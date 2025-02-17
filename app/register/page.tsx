@@ -35,12 +35,14 @@ const page = () => {
               type="email"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black mb-2"
               placeholder="email"
+              required
             />
             <label className="text-base">Password</label>
             <input
               type="password"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black"
               placeholder="password"
+              required
             />
           </div>
           <button className="bg-purple-500 w-[35%] text-base rounded-3xl p-2 text-white self-center">

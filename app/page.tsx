@@ -1,12 +1,18 @@
 "use client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const page = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push("/dashboard");
+  };
 
   return (
     <div className="bg-gradient-to-r from-purple-300 to-white">
@@ -22,7 +28,10 @@ const page = () => {
         <h1 className="font-semibold mb-4 text-[24px] uppercase text-center lg:text-3xl">
           Admin Dashboard.
         </h1>
-        <form className="bg-white rounded-xl py-5 px-3 gap-2 flex flex-col w-[90%] sm:w-[55%] lg:w-[35%] shadow-lg">
+        <form
+          className="bg-white rounded-xl py-5 px-3 gap-2 flex flex-col w-[90%] sm:w-[55%] lg:w-[35%] shadow-lg"
+          onSubmit={handleLogin}
+        >
           <h2 className="text-black text-center font-extrabold text-2xl font-mono">
             Welcome Back, Admin.
           </h2>
@@ -35,16 +44,22 @@ const page = () => {
               type="email"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black mb-2"
               placeholder="email"
+              required
             />
             <label className="text-base">Password</label>
             <input
               type="password"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black"
               placeholder="password"
+              required
             />
             <div className="flex justify-between items-center mt-6">
               <span className="text-sm flex items-center justify-center gap-2">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  className=" accent-purple-500"
+                  defaultChecked
+                />
                 <span>Remember Me</span>
               </span>
               <span className="text-sm">Forgot Password?</span>
