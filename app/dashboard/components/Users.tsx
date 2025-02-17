@@ -47,6 +47,15 @@ const Users = () => {
       walletBalance: "$500.40",
       active: false,
     },
+    {
+      accountType: "Baddie",
+      fullName: "Scott Davis",
+      username: "scottdavis",
+      gender: "Male",
+      phoneNumber: "+1 141 252 343",
+      walletBalance: "$250.40",
+      active: true,
+    },
   ];
 
   const filteredUsers = users.filter((user) => {
@@ -123,14 +132,20 @@ const Users = () => {
           </li>
         </ul>
         <div className="flex gap-10 items-center">
-          <div className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
-            <IoMdSearch size={24} className="text-black cursor-pointer" />
+          <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
+            <label htmlFor="submit">
+              <IoMdSearch size={24} className="text-black cursor-pointer" />
+            </label>
             <input
               type="text"
               placeholder="Search For User By UserName"
               className="outline-none flex-1 bg-transparent text-[#BCC1CA] text-base"
+              required
             />
-          </div>
+            <button id="submit" className="hidden">
+              Submit
+            </button>
+          </form>
           <div className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer">
             <CiFilter size={24} color="#565E6C" />
             <span className="text-[#565E6C]">Filter</span>
@@ -175,6 +190,23 @@ const Users = () => {
           ))}
         </tbody>
       </table>
+      <ul className="flex justify-center items-center gap-10">
+        <li className="bg-purple-500 rounded-md text-white px-3 py-1 cursor-pointer">
+          1
+        </li>
+        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+          2
+        </li>
+        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+          3
+        </li>
+        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+          4
+        </li>
+        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+          5
+        </li>
+      </ul>
     </div>
   );
 };
