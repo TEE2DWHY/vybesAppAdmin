@@ -3,7 +3,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-// Define the types for form data
 interface FormData {
   email: string;
   password: string;
@@ -92,11 +91,11 @@ const page: React.FC = () => {
           <button className="bg-purple-500 w-[35%] text-base rounded-3xl p-2 text-white self-center">
             Login
           </button>
-          <p className="text-base text-center my-4">
-            New To VybesApp?{" "}
+          <p className="text-sm text-center my-4 capitalize">
+            Admin no get account keh?{" "}
             <a href="/register">
               <span className="font-bold underline text-purple-500 cursor-pointer">
-                SignUp
+                Sha SignUp
               </span>
             </a>
           </p>

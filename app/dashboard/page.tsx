@@ -16,7 +16,7 @@ const page: React.FC<PageProps> = () => {
     <>
       <div className="flex">
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="w-[80%] p-10">
+        <div className="w-[84%] p-10 h-screen">
           {activeTab === "users" && <Users />}
           {activeTab === "events" && <Events />}
           {activeTab === "payments" && <Payments />}

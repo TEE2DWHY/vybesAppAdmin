@@ -20,12 +20,12 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <ul className="flex flex-col w-[20%] bg-gradient-to-t from-white to-purple-600 h-[100vh] rounded-tr-[20px] rounded-br-[20px] items-center justify-center gap-12">
+    <ul className="flex flex-col w-[16%] bg-gradient-to-t from-white to-purple-600 h-[100vh] rounded-tr-[20px] rounded-br-[20px] items-center justify-center gap-12">
       {menuItems.map((item) => (
         <li
           key={item.name}
-          className={`text-white font-[family-name:var(--font-geist-mono)] text-xl cursor-pointer flex items-center gap-2 ${
-            activeTab === item.name ? "text-purple-800" : ""
+          className={`text-base cursor-pointer flex items-center gap-2 ${
+            activeTab === item.name ? "text-purple-800" : "text-white "
           }`}
           onClick={() => setActiveTab(item.name)}
         >
