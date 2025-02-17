@@ -18,7 +18,7 @@ const page = () => {
         className="absolute top-8 left-8 cursor-pointer"
         priority
       />
-      <div className="flex flex-col items-center justify-center h-[100vh] font-[family-name:var(--font-geist-mono)] capitalize text-2xl">
+      <div className="flex flex-col items-center justify-center h-[100vh] capitalize text-2xl">
         <h1 className="font-semibold mb-4 text-[24px] uppercase text-center lg:text-3xl">
           Create An Account.
         </h1>
