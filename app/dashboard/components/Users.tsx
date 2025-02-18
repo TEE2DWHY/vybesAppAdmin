@@ -6,9 +6,12 @@ import { FaUserAlt } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
 import { CiFilter } from "react-icons/ci";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import { FaAngleLeft } from "react-icons/fa6";
+import { FaChevronRight } from "react-icons/fa6";
 
 const Users = () => {
   const [accountType, setAccountType] = useState("All");
+  const [pagination, setPagination] = useState(1);
 
   const users = [
     {
@@ -98,7 +101,7 @@ const Users = () => {
           </div>
         </div>
       </div>
-      <div className="flex justify-between items-center pt-8">
+      <div className="flex justify-between items-center pt-4 border-t border-gray-300">
         <ul className="flex gap-10 text-base">
           <li
             className={`${
@@ -190,22 +193,58 @@ const Users = () => {
           ))}
         </tbody>
       </table>
-      <ul className="flex justify-center items-center gap-10">
-        <li className="bg-purple-500 rounded-md text-white px-3 py-1 cursor-pointer">
+      <ul className="flex justify-center items-center gap-6">
+        <FaAngleLeft
+          size={16}
+          color="#1b1b1b"
+          cursor={"pointer"}
+          onClick={() => setPagination((prev) => (prev <= 1 ? 5 : prev - 1))}
+        />
+        <li
+          className={`${
+            pagination === 1 ? "bg-purple-500" : "bg-gray-500"
+          } rounded-md text-white px-3 py-1 cursor-pointer`}
+          onClick={() => setPagination(1)}
+        >
           1
         </li>
-        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+        <li
+          className={`${
+            pagination === 2 ? "bg-purple-500" : "bg-gray-500"
+          } rounded-md text-white px-3 py-1 cursor-pointer`}
+          onClick={() => setPagination(2)}
+        >
           2
         </li>
-        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+        <li
+          className={`${
+            pagination === 3 ? "bg-purple-500" : "bg-gray-500"
+          } rounded-md text-white px-3 py-1 cursor-pointer`}
+          onClick={() => setPagination(3)}
+        >
           3
         </li>
-        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+        <li
+          className={`${
+            pagination === 4 ? "bg-purple-500" : "bg-gray-500"
+          } rounded-md text-white px-3 py-1 cursor-pointer`}
+          onClick={() => setPagination(4)}
+        >
           4
         </li>
-        <li className="bg-gray-500 rounded-md text-white px-3 py-1 cursor-pointer">
+        <li
+          className={`${
+            pagination === 5 ? "bg-purple-500" : "bg-gray-500"
+          } rounded-md text-white px-3 py-1 cursor-pointer`}
+          onClick={() => setPagination(5)}
+        >
           5
         </li>
+        <FaChevronRight
+          size={16}
+          color="#1b1b1b"
+          onClick={() => setPagination((prev) => (prev >= 5 ? 1 : prev + 1))}
+        />
       </ul>
     </div>
   );
