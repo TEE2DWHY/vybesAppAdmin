@@ -12,6 +12,9 @@ import { FaChevronRight } from "react-icons/fa6";
 const Users = () => {
   const [accountType, setAccountType] = useState("All");
   const [pagination, setPagination] = useState(1);
+  const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
+    null
+  );
 
   const users = [
     {
@@ -65,6 +68,10 @@ const Users = () => {
     if (accountType === "All") return true;
     return user.accountType.toLowerCase() === accountType.toLowerCase();
   });
+
+  const toggleModal = (index: number | null) => {
+    setSelectedUserIndex(selectedUserIndex === index ? null : index);
+  };
 
   return (
     <div className="w-full">
@@ -155,7 +162,10 @@ const Users = () => {
           </div>
         </div>
       </div>
-      <table className="my-12 w-full rounded-tl-2xl rounded-tr-2xl overflow-hidden border-spacing-0">
+      <table
+        className="my-12 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
+        onClick={() => setSelectedUserIndex(null)}
+      >
         <thead className="text-left bg-purple-500 ">
           <tr>
             <th className="pl-4 text-white py-5">Account Type</th>
@@ -184,10 +194,27 @@ const Users = () => {
                   <span className="text-red-500">Inactive</span>
                 )}
               </td>
-              <td>
-                <span className="flex items-center justify-center cursor-pointer">
-                  <HiOutlineDotsHorizontal size={24} />
+              <td className="relative">
+                <span className="flex items-center justify-center cursor-pointer overflow-hidden">
+                  <HiOutlineDotsHorizontal
+                    size={24}
+                    cursor={"pointer"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleModal(index);
+                    }}
+                  />
                 </span>
+                {selectedUserIndex === index && (
+                  <ul
+                    className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <li className="cursor-pointer">View Details</li>
+                    <li className="cursor-pointer">Edit Details</li>
+                    <li className="cursor-pointer">Delete User</li>
+                  </ul>
+                )}
               </td>
             </tr>
           ))}
@@ -244,6 +271,7 @@ const Users = () => {
           size={16}
           color="#1b1b1b"
           onClick={() => setPagination((prev) => (prev >= 5 ? 1 : prev + 1))}
+          cursor={"pointer"}
         />
       </ul>
     </div>
