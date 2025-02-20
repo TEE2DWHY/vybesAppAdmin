@@ -4,6 +4,7 @@ import SideBar from "./components/SideBar";
 import Users from "./components/Users";
 import Events from "./components/Events";
 import Payments from "./components/Payments";
+import Footer from "./components/Footer";
 
 interface PageProps {
   activeTab: string;
@@ -16,11 +17,10 @@ const page: React.FC<PageProps> = () => {
     <>
       <div className="flex">
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="w-[84%] p-10 h-screen">
-          {activeTab === "users" && <Users />}
-          {activeTab === "events" && <Events />}
-          {activeTab === "payments" && <Payments />}
-        </div>
+        {activeTab === "users" && <Users />}
+        {activeTab === "events" && <Events />}
+        {activeTab === "payments" && <Payments />}
+        <Footer />
       </div>
     </>
   );

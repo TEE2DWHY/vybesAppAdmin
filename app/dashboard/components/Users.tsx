@@ -74,7 +74,7 @@ const Users = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-[84%] px-10 py-5 h-screen">
       <div>
         <h1 className="text-3xl border-b border-gray-200 pb-2">Users</h1>
       </div>
