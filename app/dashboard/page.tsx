@@ -5,21 +5,15 @@ import Users from "./components/Users";
 import Events from "./components/Events";
 import Payments from "./components/Payments";
 
-interface DashboardProps {
-  activeTab: string;
-}
-
-const Page: React.FC<DashboardProps> = ({ activeTab }: DashboardProps) => {
-  const [activeTabState, setActiveTabState] = useState(activeTab || "users");
+export default function Page() {
+  const [activeTab, setActiveTab] = useState("users");
 
   return (
     <div className="flex">
-      <SideBar activeTab={activeTabState} setActiveTab={setActiveTabState} />
-      {activeTabState === "users" && <Users />}
-      {activeTabState === "events" && <Events />}
-      {activeTabState === "payments" && <Payments />}
+      <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {activeTab === "users" && <Users />}
+      {activeTab === "events" && <Events />}
+      {activeTab === "payments" && <Payments />}
     </div>
   );
-};
-
-export default Page;
+}
