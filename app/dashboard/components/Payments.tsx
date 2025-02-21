@@ -7,7 +7,7 @@ const Payments = () => {
   const [txType, setTxType] = useState<string | null>("All");
   const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
   const [finalCoinPrice, setFinalCoinPrice] = useState<number>(50);
-  const [transactions, setTransactions] = useState([
+  const transactions = [
     {
       id: 1,
       user: "User1",
@@ -43,7 +43,7 @@ const Payments = () => {
       type: "Transfer",
       date: "2024-08-19",
     },
-  ]);
+  ];
 
   const [pagination, setPagination] = useState(1);
 
@@ -92,6 +92,14 @@ const Payments = () => {
                 <h1 className="text-3xl text-white">{finalCoinPrice}</h1>
                 <h4 className="capitalize text-white">
                   Current Vyber Coin Price (₦)
+                </h4>
+              </div>
+            </div>
+            <div className="rounded-md bg-gradient-to-r from-pink-500 to-pink-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
+              <div>
+                <h1 className="text-3xl text-white">4</h1>
+                <h4 className="capitalize text-white">
+                  No of Transacting Users
                 </h4>
               </div>
             </div>

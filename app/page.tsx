@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -8,7 +9,7 @@ interface FormData {
   password: string;
 }
 
-const page: React.FC = () => {
+const Page: React.FC = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState<FormData>({
@@ -93,11 +94,11 @@ const page: React.FC = () => {
           </button>
           <p className="text-sm text-center my-4 capitalize">
             Admin no get account keh?{" "}
-            <a href="/register">
+            <Link href="/register">
               <span className="font-bold underline text-purple-500 cursor-pointer">
                 Sha SignUp
               </span>
-            </a>
+            </Link>
           </p>
         </form>
       </div>
@@ -105,4 +106,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default Page;

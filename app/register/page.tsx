@@ -1,12 +1,26 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import React, { useState } from "react";
 
-const page = () => {
+const Page = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Submitting form data:", formData);
+  };
 
   return (
     <div className="bg-gradient-to-r from-purple-300 to-white">
@@ -22,9 +36,12 @@ const page = () => {
         <h1 className="font-semibold mb-4 text-[24px] uppercase text-center lg:text-3xl">
           Create An Account.
         </h1>
-        <form className="bg-white rounded-xl py-5 px-3 gap-2 flex flex-col w-[90%] sm:w-[55%] lg:w-[35%] shadow-lg">
-          <h2 className="text-black text-center font-extrabold text-3xl font-mono">
-            Welcome
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xl py-5 px-3 gap-2 flex flex-col w-[90%] sm:w-[55%] lg:w-[35%] shadow-lg"
+        >
+          <h2 className="text-black text-center font-extrabold text-3xl">
+            Welcome, Chief.
           </h2>
           <p className="capitalize text-base text-gray-400 text-center w-3/5 self-center">
             Enter your details to create an account.
@@ -33,28 +50,34 @@ const page = () => {
             <label className="text-base">Email</label>
             <input
               type="email"
+              name="email"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black mb-2"
               placeholder="email"
               required
+              value={formData.email}
+              onChange={handleInputChange}
             />
             <label className="text-base">Password</label>
             <input
               type="password"
+              name="password"
               className="border border-gray-300 px-4 py-3 rounded-md text-sm w-full  bg-[#F8F9FA] outline-none text-black"
               placeholder="password"
               required
+              value={formData.password}
+              onChange={handleInputChange}
             />
           </div>
           <button className="bg-purple-500 w-[35%] text-base rounded-3xl p-2 text-white self-center">
             Sign Up
           </button>
           <p className="text-base text-center my-4">
-            Already Have An Account? {"  "}{" "}
-            <a href="/">
+            Already Have An Account?{"  "}{" "}
+            <Link href="/">
               <span className="font-bold underline text-purple-500 cursor-pointer">
                 Login
               </span>
-            </a>
+            </Link>
           </p>
         </form>
       </div>
@@ -62,4 +85,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

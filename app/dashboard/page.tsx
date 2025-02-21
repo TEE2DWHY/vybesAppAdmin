@@ -9,7 +9,7 @@ interface PageProps {
   activeTab: string;
 }
 
-const page: React.FC<PageProps> = () => {
+const Page: React.FC<PageProps> = () => {
   const [activeTab, setActiveTab] = useState("users");
 
   return (
@@ -24,4 +24,4 @@ const page: React.FC<PageProps> = () => {
   );
 };
 
-export default page;
+export default Page;
