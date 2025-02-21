@@ -5,11 +5,11 @@ import Users from "./components/Users";
 import Events from "./components/Events";
 import Payments from "./components/Payments";
 
-interface PageProps {
+interface DashboardProps {
   activeTab: string;
 }
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC<DashboardProps> = () => {
   const [activeTab, setActiveTab] = useState("users");
 
   return (
