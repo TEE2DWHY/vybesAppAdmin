@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PiLetterCircleVBold } from "react-icons/pi";
 import { TbCircleLetterB } from "react-icons/tb";
 import { FaUsers } from "react-icons/fa6";
@@ -8,7 +8,8 @@ import { CiFilter } from "react-icons/ci";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
-import { users } from "@/data/users";
+import { cookie } from "@/utils/storage";
+import { adminInstance } from "@/config/axios";
 
 const Users = () => {
   const [accountType, setAccountType] = useState("All");
@@ -16,14 +17,40 @@ const Users = () => {
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
     null
   );
-
-  const filteredUsers = users.filter((user) => {
-    if (accountType === "All") return true;
-    return user.accountType.toLowerCase() === accountType.toLowerCase();
-  });
+  const [token, setToken] = useState(cookie.getCookie("token"));
+  const [allUsers, setAllUsers] = useState([]);
+  const [filteredUser, setFilteredUser] = useState([]);
 
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const resposne = await adminInstance.get("/get-users", {
+          params: {
+            page: pagination,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(resposne);
+        setAllUsers(resposne.data?.payload?.users);
+        setFilteredUser(resposne.data?.payload?.users);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, [pagination]);
+
+  const filterUser = (accountType: any) => {
+    const filteredUser =
+      accountType === "all"
+        ? allUsers
+        : allUsers.filter((user: any) => user.accountType === accountType);
+    setFilteredUser(filteredUser);
   };
 
   return (
@@ -72,7 +99,10 @@ const Users = () => {
                   ? "text-purple-500 font-bold"
                   : "text-[#BFBFBF]"
               } cursor-pointer`}
-              onClick={() => setAccountType("All")}
+              onClick={() => {
+                filterUser("all");
+                setAccountType("All");
+              }}
             >
               All
             </li>
@@ -82,7 +112,10 @@ const Users = () => {
                   ? "text-purple-500 font-bold"
                   : "text-[#BFBFBF]"
               } cursor-pointer`}
-              onClick={() => setAccountType("Vyber")}
+              onClick={() => {
+                filterUser("vyber");
+                setAccountType("Vyber");
+              }}
             >
               Vyber
             </li>
@@ -92,7 +125,10 @@ const Users = () => {
                   ? "text-purple-500 font-bold"
                   : "text-[#BFBFBF]"
               } cursor-pointer`}
-              onClick={() => setAccountType("Baddie")}
+              onClick={() => {
+                filterUser("baddie");
+                setAccountType("Baddie");
+              }}
             >
               Baddie
             </li>
@@ -135,15 +171,15 @@ const Users = () => {
             </tr>
           </thead>
           <tbody className="bg-purple-50">
-            {filteredUsers.map((user, index) => (
+            {filteredUser.map((user: any, index) => (
               <tr
                 key={index}
                 className="border-b border-gray-200 text-gray-600"
               >
-                <td className="pl-4 py-3">{user.accountType}</td>
-                <td className="pl-4 py-3">{user.fullName}</td>
-                <td className="pl-4 py-3">{user.username}</td>
-                <td className="pl-4 py-3">{user.gender}</td>
+                <td className="pl-4 py-3 capitalize">{user.accountType}</td>
+                <td className="pl-4 py-3 capitalize">{user.fullName}</td>
+                <td className="pl-4 py-3 capitalize">{user.userName}</td>
+                <td className="pl-4 py-3 capitalize">{user.gender}</td>
                 <td className="pl-4 py-3">{user.phoneNumber}</td>
                 <td className="pl-4 py-3">{user.walletBalance}</td>
                 <td className="pl-4 py-3">
