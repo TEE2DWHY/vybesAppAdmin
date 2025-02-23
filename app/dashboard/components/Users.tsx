@@ -18,12 +18,19 @@ const Users = () => {
     null
   );
   const [token, setToken] = useState(cookie.getCookie("token"));
+  const [userData, setUserData] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [filteredUser, setFilteredUser] = useState([]);
+  const [totalPage, setTotalPage] = useState<any | null>(null);
 
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
   };
+
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPage; i++) {
+    pageNumbers.push(i);
+  }
 
   useEffect(() => {
     (async () => {
@@ -31,19 +38,21 @@ const Users = () => {
         const resposne = await adminInstance.get("/get-users", {
           params: {
             page: pagination,
+            accountType: accountType,
           },
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(resposne);
+        setTotalPage(resposne?.data?.payload?.totalPage);
+        setUserData(resposne?.data?.payload?.allUsers);
         setAllUsers(resposne.data?.payload?.users);
         setFilteredUser(resposne.data?.payload?.users);
       } catch (error) {
         console.log(error);
       }
     })();
-  }, [pagination]);
+  }, [pagination, accountType]);
 
   const filterUser = (accountType: any) => {
     const filteredUser =
@@ -52,7 +61,13 @@ const Users = () => {
         : allUsers.filter((user: any) => user.accountType === accountType);
     setFilteredUser(filteredUser);
   };
+  const numberOfVybers = userData.filter(
+    (user: any) => user?.accountType === "vyber"
+  );
 
+  const numberOfBaddies = userData.filter(
+    (user: any) => user?.accountType === "baddie"
+  );
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
       <div className="border border-gray-300 py-4 px-8 rounded-xl">
@@ -65,21 +80,21 @@ const Users = () => {
           <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
             <PiLetterCircleVBold size={62} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">50</h1>
+              <h1 className="text-3xl text-white">{numberOfVybers.length}</h1>
               <h4 className="capitalize text-white">No of vybers</h4>
             </div>
           </div>
           <div className="rounded-md bg-gradient-to-r from-orange-500 to-orange-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
             <TbCircleLetterB size={62} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">90</h1>
+              <h1 className="text-3xl text-white">{numberOfBaddies.length}</h1>
               <h4 className="capitalize text-white">No of baddies</h4>
             </div>
           </div>
           <div className="rounded-md bg-gradient-to-r from-gray-700 to-gray-500 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
             <FaUsers size={62} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">140</h1>
+              <h1 className="text-3xl text-white">{userData?.length}</h1>
               <h4 className="capitalize text-white">Total No of users</h4>
             </div>
           </div>
@@ -220,52 +235,28 @@ const Users = () => {
             size={16}
             color="#1b1b1b"
             cursor={"pointer"}
-            onClick={() => setPagination((prev) => (prev <= 1 ? 5 : prev - 1))}
+            onClick={() =>
+              setPagination((prev) => (prev <= 1 ? totalPage : prev - 1))
+            }
           />
-          <li
-            className={`${
-              pagination === 1 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(1)}
-          >
-            1
-          </li>
-          <li
-            className={`${
-              pagination === 2 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(2)}
-          >
-            2
-          </li>
-          <li
-            className={`${
-              pagination === 3 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(3)}
-          >
-            3
-          </li>
-          <li
-            className={`${
-              pagination === 4 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(4)}
-          >
-            4
-          </li>
-          <li
-            className={`${
-              pagination === 5 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(5)}
-          >
-            5
-          </li>
+          {pageNumbers.map((pageNumber, index) => (
+            <li
+              key={index}
+              className={`${
+                pagination === pageNumber ? "bg-purple-500" : "bg-gray-500"
+              } rounded-md text-white px-3 py-1 cursor-pointer`}
+              onClick={() => setPagination(pageNumber)}
+            >
+              {pageNumber}
+            </li>
+          ))}
+
           <FaChevronRight
             size={16}
             color="#1b1b1b"
-            onClick={() => setPagination((prev) => (prev >= 5 ? 1 : prev + 1))}
+            onClick={() =>
+              setPagination((prev) => (prev >= totalPage ? 1 : prev + 1))
+            }
             cursor={"pointer"}
           />
         </ul>
