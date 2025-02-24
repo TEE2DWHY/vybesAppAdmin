@@ -40,9 +40,6 @@ const Users = () => {
             page: pagination,
             accountType: accountType,
           },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         });
         setTotalPage(resposne?.data?.payload?.totalPage);
         setUserData(resposne?.data?.payload?.allUsers);
@@ -253,10 +250,12 @@ const Users = () => {
 
           <FaChevronRight
             size={16}
-            color="#1b1b1b"
             onClick={() =>
               setPagination((prev) => (prev >= totalPage ? 1 : prev + 1))
             }
+            className={`${
+              pagination === totalPage ? "text-gray-400" : "#1b1b1b"
+            }`}
             cursor={"pointer"}
           />
         </ul>
