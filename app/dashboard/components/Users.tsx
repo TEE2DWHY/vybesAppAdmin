@@ -11,7 +11,11 @@ import { FaChevronRight } from "react-icons/fa6";
 import { cookie } from "@/utils/storage";
 import { adminInstance } from "@/config/axios";
 
-const Users = () => {
+interface UserProps {
+  filterModal: any;
+}
+
+const Users: React.FC<UserProps> = ({ filterModal }) => {
   const [accountType, setAccountType] = useState("All");
   const [pagination, setPagination] = useState(1);
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
@@ -34,6 +38,9 @@ const Users = () => {
 
   useEffect(() => {
     (async () => {
+      if (accountType === "Vyber" || accountType === "Baddie") {
+        setPagination(1);
+      }
       try {
         const resposne = await adminInstance.get("/get-users", {
           params: {
@@ -160,7 +167,10 @@ const Users = () => {
                 Submit
               </button>
             </form>
-            <div className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer">
+            <div
+              className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer"
+              onClick={filterModal}
+            >
               <CiFilter size={24} color="#565E6C" />
               <span className="text-[#565E6C]">Filter</span>
             </div>
