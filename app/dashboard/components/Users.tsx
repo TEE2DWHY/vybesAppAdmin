@@ -9,7 +9,7 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
 import { cookie } from "@/utils/storage";
-import { adminInstance } from "@/config/axios";
+import { createAdminInstance } from "@/config/axios";
 
 interface UserProps {
   filterModal: any;
@@ -26,10 +26,10 @@ const Users: React.FC<UserProps> = ({ filterModal }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [filteredUser, setFilteredUser] = useState([]);
   const [totalPage, setTotalPage] = useState<any | null>(null);
-
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
   };
+  const adminInstance = createAdminInstance(token);
 
   const pageNumbers = [];
   for (let i = 1; i <= totalPage; i++) {
@@ -72,6 +72,7 @@ const Users: React.FC<UserProps> = ({ filterModal }) => {
   const numberOfBaddies = userData.filter(
     (user: any) => user?.accountType === "baddie"
   );
+
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
       <div className="border border-gray-300 py-4 px-8 rounded-xl">

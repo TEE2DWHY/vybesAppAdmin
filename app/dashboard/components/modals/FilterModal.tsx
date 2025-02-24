@@ -1,4 +1,5 @@
 "use client";
+import { message } from "antd";
 import React, { useState } from "react";
 
 interface FilterModalProps {
@@ -9,17 +10,23 @@ const FilterModal: React.FC<FilterModalProps> = ({ hideFilterModal }) => {
   const [gender, setGender] = useState("");
   const [accountType, setAccountType] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
 
   const applyFilters = () => {
     console.log("Filters Applied:");
     console.log("Account Type:", accountType);
     console.log("Gender:", gender);
     console.log("Wallet Balance:", walletBalance);
+    if (accountType === "" && gender === "" && walletBalance === "") {
+      console.log("Error: Missing selection");
+      return messageApi.error("Please make a selection");
+    }
     hideFilterModal();
   };
 
   return (
     <>
+      {contextHolder}
       <div
         className="h-full w-full z-50 flex items-center justify-center bg-[#1b1b1b76] fixed p-4"
         onClick={hideFilterModal}

@@ -5,7 +5,7 @@ import { message } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FormData {
   email: string;
@@ -15,11 +15,17 @@ interface FormData {
 const Page: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
-
+  const token = cookie.getCookie("token");
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (token) {
+      router.replace("/dashboard");
+    }
+  }, [token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

@@ -5,13 +5,14 @@ import Users from "./components/Users";
 import Events from "./components/Events";
 import Payments from "./components/Payments";
 import FilterModal from "./components/modals/FilterModal";
+import AuthWrapper from "@/utils/AuthWrapper";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
   const [showFilterModal, setShowFilterModal] = useState(false);
 
   return (
-    <>
+    <AuthWrapper>
       {showFilterModal && (
         <FilterModal hideFilterModal={() => setShowFilterModal(false)} />
       )}
@@ -23,6 +24,6 @@ export default function Page() {
         {activeTab === "events" && <Events />}
         {activeTab === "payments" && <Payments />}
       </div>
-    </>
+    </AuthWrapper>
   );
 }
