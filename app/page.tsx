@@ -1,5 +1,5 @@
 "use client";
-import { authInstance } from "@/config/axios";
+import { authInstance, createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import Image from "next/image";
@@ -23,7 +23,17 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (token) {
-      router.replace("/dashboard");
+      const adminInstance = createAdminInstance(token);
+      const checkAuthorization = async () => {
+        try {
+          await adminInstance.get("/get-admin");
+          router.replace("/dashboard");
+        } catch (error) {
+          console.log("Authorization error: ", error);
+        }
+      };
+
+      checkAuthorization();
     }
   }, [token]);
 
