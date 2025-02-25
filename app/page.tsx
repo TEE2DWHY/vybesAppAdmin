@@ -47,15 +47,20 @@ const Page: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    messageApi.loading("Loggin in..");
+    <div className="font-[outfit]"></div>;
+    messageApi.loading(<div className="font-[outfit]">Logging in..</div>);
     try {
       const response = await authInstance.post("/login", formData);
-      messageApi.success(response.data?.message);
+      messageApi.success(
+        <div className="font-[outfit]">{response.data?.message}</div>
+      );
       cookie.storeCookie("token", response.data?.payload?.token, "");
       router.push("/dashboard");
     } catch (error: any) {
       console.error(error);
-      messageApi.error(error?.response?.data?.message);
+      messageApi.error(
+        <div className="font-[outfit]">{error?.response?.data?.message}</div>
+      );
     }
   };
 

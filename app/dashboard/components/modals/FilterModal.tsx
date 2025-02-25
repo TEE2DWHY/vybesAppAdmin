@@ -1,29 +1,48 @@
 "use client";
+import { createAdminInstance } from "@/config/axios";
+import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import React, { useState } from "react";
 
 interface FilterModalProps {
   hideFilterModal: () => void;
+  filteredUsers: any;
+  setFilteredUsers: any;
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({ hideFilterModal }) => {
+const FilterModal: React.FC<FilterModalProps> = ({
+  hideFilterModal,
+  setFilteredUsers,
+}) => {
   const [gender, setGender] = useState("");
   const [accountType, setAccountType] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
+  const token = cookie.getCookie("token");
+  const adminInstance = createAdminInstance(token);
 
-  const applyFilters = () => {
-    console.log("Filters Applied:");
-    console.log("Account Type:", accountType);
-    console.log("Gender:", gender);
-    console.log("Wallet Balance:", walletBalance);
+  const applyFilters = async () => {
     if (accountType === "" && gender === "" && walletBalance === "") {
-      console.log("Error: Missing selection");
-      return messageApi.error("Please make a selection");
+      return messageApi.error(
+        <div className="font-[outfit]">Please make a selection</div>
+      );
     }
-    hideFilterModal();
+    try {
+      const response = await adminInstance.get("/filter-users", {
+        params: {
+          accountType: accountType,
+          gender: gender,
+          walletBalance: walletBalance,
+        },
+      });
+      console.log(response.data);
+      setFilteredUsers(response.data.payload?.users);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      hideFilterModal();
+    }
   };
-
   return (
     <>
       {contextHolder}
@@ -74,7 +93,6 @@ const FilterModal: React.FC<FilterModalProps> = ({ hideFilterModal }) => {
               </ul>
             </div>
 
-            {/* Wallet Balance Filter */}
             <div className="flex flex-col gap-2">
               <span className="">Wallet Balance</span>
               <ul className="flex flex-col gap-2">
@@ -125,7 +143,6 @@ const FilterModal: React.FC<FilterModalProps> = ({ hideFilterModal }) => {
               </ul>
             </div>
 
-            {/* Gender Filter */}
             <div className="flex flex-col gap-2">
               <span className="">Gender</span>
               <ul className="flex flex-col gap-2">

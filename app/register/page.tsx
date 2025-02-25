@@ -28,11 +28,15 @@ const Page = () => {
     try {
       const response = await authInstance.post("/register", formData);
       console.log(response.data);
-      messageApi.success(response.data?.message);
+      messageApi.success(
+        <div className="font-[outfit]">{response.data?.message}</div>
+      );
       router.push("/");
     } catch (error: any) {
       console.error(error);
-      messageApi.error(error?.response?.data?.message);
+      messageApi.error(
+        <div className="font-[outfit]">{error?.response?.data?.message}</div>
+      );
     }
   };
 

@@ -13,9 +13,15 @@ import { createAdminInstance } from "@/config/axios";
 
 interface UserProps {
   filterModal: any;
+  filteredUser: any[];
+  setFilteredUser: any;
 }
 
-const Users: React.FC<UserProps> = ({ filterModal }) => {
+const Users: React.FC<UserProps> = ({
+  filterModal,
+  filteredUser,
+  setFilteredUser,
+}) => {
   const [accountType, setAccountType] = useState("All");
   const [pagination, setPagination] = useState(1);
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
@@ -24,7 +30,6 @@ const Users: React.FC<UserProps> = ({ filterModal }) => {
   const [token, setToken] = useState(cookie.getCookie("token"));
   const [userData, setUserData] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
-  const [filteredUser, setFilteredUser] = useState([]);
   const [totalPage, setTotalPage] = useState<any | null>(null);
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
@@ -194,7 +199,7 @@ const Users: React.FC<UserProps> = ({ filterModal }) => {
             </tr>
           </thead>
           <tbody className="bg-purple-50">
-            {filteredUser.map((user: any, index) => (
+            {filteredUser?.map((user: any, index) => (
               <tr
                 key={index}
                 className="border-b border-gray-200 text-gray-600"
