@@ -36,8 +36,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
           walletBalance: walletBalance,
         },
       });
-      console.log(response.data);
-      setFilteredUsers(response.data.payload?.users); // Assuming this is the correct structure of the response
+      setFilteredUsers(response.data.payload?.users);
     } catch (error) {
       console.log(error);
     } finally {

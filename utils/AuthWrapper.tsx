@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminInstance } from "@/config/axios";
+import { createAdminInstance } from "@/config/axios";
 import { cookie } from "./storage";
 import Image from "next/image";
 
@@ -12,6 +12,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const token = cookie.getCookie("token");
+  const adminInstance = createAdminInstance(token);
 
   useEffect(() => {
     if (!token) {
@@ -28,7 +29,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       };
       checkAuthorization();
     }
-  }, [router, token]);
+  }, []);
 
   if (loading) {
     return (

@@ -16,29 +16,27 @@ interface FormData {
 const Page: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
-  const token = cookie.getCookie("token");
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
 
   useEffect(() => {
+    const token = cookie.getCookie("token");
     if (token) {
       router.replace("/dashboard");
     }
-  }, [token]);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     messageApi.loading(<div className="font-[outfit]">Logging in..</div>);
+
     try {
       const response = await authInstance.post("/login", formData);
       messageApi.success(
@@ -48,12 +46,10 @@ const Page: React.FC = () => {
       router.push("/dashboard");
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        console.error(error);
         messageApi.error(
           <div className="font-[outfit]">{error?.response?.data?.message}</div>
         );
       } else {
-        console.error("Unexpected error:", error);
         messageApi.error(
           <div className="font-[outfit]">An unexpected error occurred.</div>
         );
@@ -66,15 +62,15 @@ const Page: React.FC = () => {
       {contextHolder}
       <div className="bg-gradient-to-r from-purple-300 to-white">
         <Image
-          src={"/images/logo.png"}
+          src="/images/logo.png"
           alt="logo"
           width={40}
           height={40}
           className="absolute top-8 left-8 cursor-pointer"
           priority
         />
-        <div className="flex flex-col items-center justify-center h-[100vh] capitalize text-2xl">
-          <h1 className="font-semibold mb-4 text-[24px] uppercase text-center lg:text-3xl">
+        <div className="flex flex-col items-center justify-center h-screen capitalize text-2xl">
+          <h1 className="font-semibold mb-4 text-3xl uppercase text-center">
             Admin Dashboard.
           </h1>
           <form
@@ -87,7 +83,7 @@ const Page: React.FC = () => {
             <p className="capitalize text-base text-gray-400 text-center w-3/5 self-center">
               Enter your details to sign in to your account.
             </p>
-            <div className="w-[100%] flex flex-col p-5">
+            <div className="w-full flex flex-col p-5">
               <label className="text-base">Email</label>
               <input
                 type="email"

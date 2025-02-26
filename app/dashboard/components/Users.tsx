@@ -8,10 +8,11 @@ import { CiFilter } from "react-icons/ci";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
-import { adminInstance } from "@/config/axios";
+import { createAdminInstance } from "@/config/axios";
 import { Empty } from "antd";
 import Image from "next/image";
 import { User } from "@/types";
+import { cookie } from "@/utils/storage";
 
 interface UserProps {
   filterModal: () => void;
@@ -34,6 +35,8 @@ const Users: React.FC<UserProps> = ({
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [totalPage, setTotalPage] = useState<number | null>(null);
   const [pageNumbers, setPageNumbers] = useState<number[]>([]);
+  const token = cookie.getCookie("token");
+  const adminInstance = createAdminInstance(token);
 
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
