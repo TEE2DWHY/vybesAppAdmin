@@ -24,17 +24,7 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (token) {
-      const adminInstance = createAdminInstance(token);
-      const checkAuthorization = async () => {
-        try {
-          await adminInstance.get("/get-admin");
-          router.replace("/dashboard");
-        } catch (error) {
-          console.log("Authorization error: ", error);
-        }
-      };
-
-      checkAuthorization();
+      router.replace("/dashboard");
     }
   }, [token]);
 
