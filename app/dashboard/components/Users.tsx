@@ -11,19 +11,10 @@ import { FaChevronRight } from "react-icons/fa6";
 import { adminInstance } from "@/config/axios";
 import { Empty } from "antd";
 import Image from "next/image";
-
-interface User {
-  accountType: string;
-  fullName: string;
-  userName: string;
-  gender: string;
-  phoneNumber: string;
-  walletBalance: string;
-  active: boolean;
-}
+import { User } from "@/types";
 
 interface UserProps {
-  filterModal: any;
+  filterModal: () => void;
   filteredUser: User[];
   setFilteredUser: React.Dispatch<React.SetStateAction<User[]>>;
 }

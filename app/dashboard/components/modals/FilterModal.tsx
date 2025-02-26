@@ -3,13 +3,7 @@ import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import React, { useState } from "react";
-
-interface User {
-  id: string;
-  accountType: string;
-  gender: string;
-  walletBalance: string;
-}
+import { User } from "@/types";
 
 interface FilterModalProps {
   hideFilterModal: () => void;

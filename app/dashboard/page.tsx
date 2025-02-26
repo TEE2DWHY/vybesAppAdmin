@@ -6,11 +6,12 @@ import Events from "./components/Events";
 import Payments from "./components/Payments";
 import FilterModal from "./components/modals/FilterModal";
 import AuthWrapper from "@/utils/AuthWrapper";
+import { User } from "@/types";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
   return (
     <AuthWrapper>
