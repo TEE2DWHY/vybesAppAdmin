@@ -1,5 +1,5 @@
 "use client";
-import { authInstance, createAdminInstance } from "@/config/axios";
+import { authInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import Image from "next/image";
