@@ -5,6 +5,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 const Page = () => {
   const router = useRouter();
@@ -32,11 +33,18 @@ const Page = () => {
         <div className="font-[outfit]">{response.data?.message}</div>
       );
       router.push("/");
-    } catch (error: any) {
-      console.error(error);
-      messageApi.error(
-        <div className="font-[outfit]">{error?.response?.data?.message}</div>
-      );
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error(error);
+        messageApi.error(
+          <div className="font-[outfit]">{error?.response?.data?.message}</div>
+        );
+      } else {
+        console.error("Unexpected error:", error);
+        messageApi.error(
+          <div className="font-[outfit]">An unexpected error occurred.</div>
+        );
+      }
     }
   };
 

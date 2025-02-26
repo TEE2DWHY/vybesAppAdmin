@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { AxiosError } from "axios";
 
 interface FormData {
   email: string;
@@ -35,7 +36,7 @@ const Page: React.FC = () => {
 
       checkAuthorization();
     }
-  }, [token]);
+  }, [token, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,7 +48,6 @@ const Page: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    <div className="font-[outfit]"></div>;
     messageApi.loading(<div className="font-[outfit]">Logging in..</div>);
     try {
       const response = await authInstance.post("/login", formData);
@@ -56,11 +56,18 @@ const Page: React.FC = () => {
       );
       cookie.storeCookie("token", response.data?.payload?.token, "");
       router.push("/dashboard");
-    } catch (error: any) {
-      console.error(error);
-      messageApi.error(
-        <div className="font-[outfit]">{error?.response?.data?.message}</div>
-      );
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error(error);
+        messageApi.error(
+          <div className="font-[outfit]">{error?.response?.data?.message}</div>
+        );
+      } else {
+        console.error("Unexpected error:", error);
+        messageApi.error(
+          <div className="font-[outfit]">An unexpected error occurred.</div>
+        );
+      }
     }
   };
 

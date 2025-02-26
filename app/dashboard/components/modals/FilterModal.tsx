@@ -4,19 +4,26 @@ import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import React, { useState } from "react";
 
+interface User {
+  id: string;
+  accountType: string;
+  gender: string;
+  walletBalance: string;
+}
+
 interface FilterModalProps {
   hideFilterModal: () => void;
-  filteredUsers: any;
-  setFilteredUsers: any;
+  filteredUsers: User[];
+  setFilteredUsers: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
   hideFilterModal,
   setFilteredUsers,
 }) => {
-  const [gender, setGender] = useState("");
-  const [accountType, setAccountType] = useState("");
-  const [walletBalance, setWalletBalance] = useState("");
+  const [gender, setGender] = useState<string>("");
+  const [accountType, setAccountType] = useState<string>("");
+  const [walletBalance, setWalletBalance] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
@@ -36,13 +43,14 @@ const FilterModal: React.FC<FilterModalProps> = ({
         },
       });
       console.log(response.data);
-      setFilteredUsers(response.data.payload?.users);
+      setFilteredUsers(response.data.payload?.users); // Assuming this is the correct structure of the response
     } catch (error) {
       console.log(error);
     } finally {
       hideFilterModal();
     }
   };
+
   return (
     <>
       {contextHolder}

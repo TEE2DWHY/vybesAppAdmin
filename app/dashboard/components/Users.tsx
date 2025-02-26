@@ -12,10 +12,20 @@ import { adminInstance } from "@/config/axios";
 import { Empty } from "antd";
 import Image from "next/image";
 
+interface User {
+  accountType: string;
+  fullName: string;
+  userName: string;
+  gender: string;
+  phoneNumber: string;
+  walletBalance: string;
+  active: boolean;
+}
+
 interface UserProps {
   filterModal: any;
-  filteredUser: any[];
-  setFilteredUser: any;
+  filteredUser: User[];
+  setFilteredUser: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
 const Users: React.FC<UserProps> = ({
@@ -23,23 +33,36 @@ const Users: React.FC<UserProps> = ({
   filteredUser,
   setFilteredUser,
 }) => {
-  const [accountType, setAccountType] = useState("All");
-  const [pagination, setPagination] = useState(1);
+  const [accountType, setAccountType] = useState<string>("All");
+  const [pagination, setPagination] = useState<number | null>(1);
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [totalPage, setTotalPage] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [userData, setUserData] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [totalPage, setTotalPage] = useState<number | null>(null);
+  const [pageNumbers, setPageNumbers] = useState<number[]>([]);
+
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
   };
 
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPage; i++) {
-    pageNumbers.push(i);
-  }
+  useEffect(() => {
+    const generatePageNumbers = () => {
+      if (totalPage) {
+        const numbers = [];
+        for (let i = 1; i <= totalPage; i++) {
+          numbers.push(i);
+        }
+        setPageNumbers(numbers);
+      }
+    };
+
+    if (totalPage !== null) {
+      generatePageNumbers();
+    }
+  }, [totalPage]);
 
   useEffect(() => {
     (async () => {
@@ -63,21 +86,22 @@ const Users: React.FC<UserProps> = ({
         setIsLoading(false);
       }
     })();
-  }, [pagination, accountType]);
+  }, [pagination, accountType, setFilteredUser]);
 
-  const filterUser = (accountType: any) => {
+  const filterUser = (accountType: string) => {
     const filteredUser =
       accountType === "all"
         ? allUsers
-        : allUsers.filter((user: any) => user.accountType === accountType);
+        : allUsers.filter((user: User) => user.accountType === accountType);
     setFilteredUser(filteredUser);
   };
+
   const numberOfVybers = userData.filter(
-    (user: any) => user?.accountType === "vyber"
+    (user: User) => user?.accountType === "vyber"
   );
 
   const numberOfBaddies = userData.filter(
-    (user: any) => user?.accountType === "baddie"
+    (user: User) => user?.accountType === "baddie"
   );
 
   console.log(filteredUser);
@@ -276,7 +300,9 @@ const Users: React.FC<UserProps> = ({
                 color="#1b1b1b"
                 cursor={"pointer"}
                 onClick={() =>
-                  setPagination((prev) => (prev <= 1 ? totalPage : prev - 1))
+                  setPagination((prev) =>
+                    prev === null || prev <= 1 ? totalPage : prev - 1
+                  )
                 }
               />
               {pageNumbers.map((pageNumber, index) => (
@@ -294,7 +320,11 @@ const Users: React.FC<UserProps> = ({
               <FaChevronRight
                 size={16}
                 onClick={() =>
-                  setPagination((prev) => (prev >= totalPage ? 1 : prev + 1))
+                  setPagination((prev) =>
+                    prev === null || (totalPage !== null && prev >= totalPage)
+                      ? 1
+                      : prev + 1
+                  )
                 }
                 className={`${
                   pagination === totalPage ? "text-gray-400" : "#1b1b1b"
