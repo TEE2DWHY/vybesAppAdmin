@@ -36,7 +36,7 @@ const Page: React.FC = () => {
 
       checkAuthorization();
     }
-  }, [token, router]);
+  }, [token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
