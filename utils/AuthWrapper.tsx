@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createAdminInstance } from "@/config/axios";
+import { adminInstance } from "@/config/axios";
 import { cookie } from "./storage";
 import Image from "next/image";
 
@@ -17,7 +17,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     if (!token) {
       router.replace("/");
     } else {
-      const adminInstance = createAdminInstance(token);
       const checkAuthorization = async () => {
         try {
           await adminInstance.get("/get-admin");

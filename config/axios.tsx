@@ -1,6 +1,8 @@
+import { cookie } from "@/utils/storage";
 import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const token = cookie.getCookie("token");
 
 export const authInstance = axios.create({
   baseURL: `${BASE_URL}/admin/auth`,
@@ -18,3 +20,5 @@ export const createAdminInstance = (token: string) => {
     },
   });
 };
+
+export const adminInstance = createAdminInstance(token);

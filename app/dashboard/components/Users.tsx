@@ -8,8 +8,9 @@ import { CiFilter } from "react-icons/ci";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
-import { cookie } from "@/utils/storage";
-import { createAdminInstance } from "@/config/axios";
+import { adminInstance } from "@/config/axios";
+import { Empty } from "antd";
+import Image from "next/image";
 
 interface UserProps {
   filterModal: any;
@@ -27,14 +28,13 @@ const Users: React.FC<UserProps> = ({
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
     null
   );
-  const [token, setToken] = useState(cookie.getCookie("token"));
+  const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [totalPage, setTotalPage] = useState<any | null>(null);
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
   };
-  const adminInstance = createAdminInstance(token);
 
   const pageNumbers = [];
   for (let i = 1; i <= totalPage; i++) {
@@ -59,6 +59,8 @@ const Users: React.FC<UserProps> = ({
         setFilteredUser(resposne.data?.payload?.users);
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [pagination, accountType]);
@@ -77,6 +79,8 @@ const Users: React.FC<UserProps> = ({
   const numberOfBaddies = userData.filter(
     (user: any) => user?.accountType === "baddie"
   );
+
+  console.log(filteredUser);
 
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
@@ -182,99 +186,123 @@ const Users: React.FC<UserProps> = ({
             </div>
           </div>
         </div>
-        <table
-          className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
-          onClick={() => setSelectedUserIndex(null)}
-        >
-          <thead className="text-left bg-purple-500 ">
-            <tr>
-              <th className="pl-4 text-white py-5">Account Type</th>
-              <th className="pl-4 text-white py-5">Full Name</th>
-              <th className="pl-4 text-white py-5">Username</th>
-              <th className="pl-4 text-white py-5">Gender</th>
-              <th className="pl-4 text-white py-5">Phone Number</th>
-              <th className="pl-4 text-white py-5">Wallet Balance</th>
-              <th className="pl-4 text-white py-5">Active</th>
-              <th className="pl-4 text-white py-5">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-purple-50">
-            {filteredUser?.map((user: any, index) => (
-              <tr
-                key={index}
-                className="border-b border-gray-200 text-gray-600"
-              >
-                <td className="pl-4 py-3 capitalize">{user.accountType}</td>
-                <td className="pl-4 py-3 capitalize">{user.fullName}</td>
-                <td className="pl-4 py-3 capitalize">{user.userName}</td>
-                <td className="pl-4 py-3 capitalize">{user.gender}</td>
-                <td className="pl-4 py-3">{user.phoneNumber}</td>
-                <td className="pl-4 py-3">{user.walletBalance}</td>
-                <td className="pl-4 py-3">
-                  {user.active ? (
-                    <span className="text-green-500">Active</span>
-                  ) : (
-                    <span className="text-red-500">Inactive</span>
-                  )}
-                </td>
-                <td className="relative">
-                  <span className="flex items-center justify-center cursor-pointer overflow-hidden">
-                    <HiOutlineDotsHorizontal
-                      size={24}
-                      cursor={"pointer"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleModal(index);
-                      }}
-                    />
-                  </span>
-                  {selectedUserIndex === index && (
-                    <ul
-                      className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <li className="cursor-pointer">View Details</li>
-                      <li className="cursor-pointer">Edit Details</li>
-                      <li className="cursor-pointer">Delete User</li>
-                    </ul>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <ul className="flex justify-center items-center gap-6">
-          <FaAngleLeft
-            size={16}
-            color="#1b1b1b"
-            cursor={"pointer"}
-            onClick={() =>
-              setPagination((prev) => (prev <= 1 ? totalPage : prev - 1))
-            }
-          />
-          {pageNumbers.map((pageNumber, index) => (
-            <li
-              key={index}
-              className={`${
-                pagination === pageNumber ? "bg-purple-500" : "bg-gray-500"
-              } rounded-md text-white px-3 py-1 cursor-pointer`}
-              onClick={() => setPagination(pageNumber)}
-            >
-              {pageNumber}
-            </li>
-          ))}
 
-          <FaChevronRight
-            size={16}
-            onClick={() =>
-              setPagination((prev) => (prev >= totalPage ? 1 : prev + 1))
-            }
-            className={`${
-              pagination === totalPage ? "text-gray-400" : "#1b1b1b"
-            }`}
-            cursor={"pointer"}
-          />
-        </ul>
+        {isLoading ? (
+          <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
+            <Image
+              src={"/images/bubble.gif"}
+              width={70}
+              height={70}
+              unoptimized
+              alt="loading-img"
+            />
+            Fetching Data...
+          </div>
+        ) : filteredUser.length === 0 ? (
+          <div className="h-[50vh] flex items-center justify-center text-gray-600 text-lg">
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              className="font-[outfit] capitalize"
+            />
+          </div>
+        ) : (
+          <table
+            className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
+            onClick={() => setSelectedUserIndex(null)}
+          >
+            <thead className="text-left bg-purple-500 ">
+              <tr>
+                <th className="pl-4 text-white py-5">Account Type</th>
+                <th className="pl-4 text-white py-5">Full Name</th>
+                <th className="pl-4 text-white py-5">Username</th>
+                <th className="pl-4 text-white py-5">Gender</th>
+                <th className="pl-4 text-white py-5">Phone Number</th>
+                <th className="pl-4 text-white py-5">Wallet Balance</th>
+                <th className="pl-4 text-white py-5">Active</th>
+                <th className="pl-4 text-white py-5">Action</th>
+              </tr>
+            </thead>
+            <tbody className="bg-purple-50">
+              {filteredUser?.map((user: any, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-200 text-gray-600"
+                >
+                  <td className="pl-4 py-3 capitalize">{user.accountType}</td>
+                  <td className="pl-4 py-3 capitalize">{user.fullName}</td>
+                  <td className="pl-4 py-3 capitalize">{user.userName}</td>
+                  <td className="pl-4 py-3 capitalize">{user.gender}</td>
+                  <td className="pl-4 py-3">{user.phoneNumber}</td>
+                  <td className="pl-4 py-3">{user.walletBalance}</td>
+                  <td className="pl-4 py-3">
+                    {user.active ? (
+                      <span className="text-green-500">Active</span>
+                    ) : (
+                      <span className="text-red-500">Inactive</span>
+                    )}
+                  </td>
+                  <td className="relative">
+                    <span className="flex items-center justify-center cursor-pointer overflow-hidden">
+                      <HiOutlineDotsHorizontal
+                        size={24}
+                        cursor={"pointer"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleModal(index);
+                        }}
+                      />
+                    </span>
+                    {selectedUserIndex === index && (
+                      <ul
+                        className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <li className="cursor-pointer">View Details</li>
+                        <li className="cursor-pointer">Edit Details</li>
+                        <li className="cursor-pointer">Delete User</li>
+                      </ul>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {isLoading ||
+          (filteredUser.length !== 0 && (
+            <ul className="flex justify-center items-center gap-6">
+              <FaAngleLeft
+                size={16}
+                color="#1b1b1b"
+                cursor={"pointer"}
+                onClick={() =>
+                  setPagination((prev) => (prev <= 1 ? totalPage : prev - 1))
+                }
+              />
+              {pageNumbers.map((pageNumber, index) => (
+                <li
+                  key={index}
+                  className={`${
+                    pagination === pageNumber ? "bg-purple-500" : "bg-gray-500"
+                  } rounded-md text-white px-3 py-1 cursor-pointer`}
+                  onClick={() => setPagination(pageNumber)}
+                >
+                  {pageNumber}
+                </li>
+              ))}
+
+              <FaChevronRight
+                size={16}
+                onClick={() =>
+                  setPagination((prev) => (prev >= totalPage ? 1 : prev + 1))
+                }
+                className={`${
+                  pagination === totalPage ? "text-gray-400" : "#1b1b1b"
+                }`}
+                cursor={"pointer"}
+              />
+            </ul>
+          ))}
       </div>
     </div>
   );
