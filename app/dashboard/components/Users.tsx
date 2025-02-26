@@ -238,7 +238,7 @@ const Users: React.FC<UserProps> = ({
               </tr>
             </thead>
             <tbody className="bg-purple-50">
-              {filteredUser?.map((user: any, index) => (
+              {filteredUser?.map((user, index) => (
                 <tr
                   key={index}
                   className="border-b border-gray-200 text-gray-600"
