@@ -29,7 +29,7 @@ const Events = () => {
         <div className="border-b border-gray-100 pb-2 flex justify-between">
           <h1 className="text-3xl font-bold">Events</h1>
           <button className="bg-purple-600 text-white px-4 py-3 flex items-center gap-2 font-bold text-sm rounded-md">
-            Add Event {"  "} <FaPlus size={14} />
+            Add Event <FaPlus size={14} />
           </button>
         </div>
         <div className="flex justify-between items-center pt-6 border-t border-gray-300">
