@@ -7,7 +7,11 @@ import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
 import { events } from "@/data/events";
 
-const Events = () => {
+interface EventsProps {
+  addEvent: () => void;
+}
+
+const Events: React.FC<EventsProps> = ({ addEvent }) => {
   const [eventType, setEventType] = useState("All");
   const [pagination, setPagination] = useState(1);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(
@@ -28,7 +32,10 @@ const Events = () => {
       <div className="border border-gray-300 py-12 px-8 rounded-xl">
         <div className="border-b border-gray-100 pb-2 flex justify-between">
           <h1 className="text-3xl font-bold">Events</h1>
-          <button className="bg-purple-600 text-white px-4 py-3 flex items-center gap-2 font-bold text-sm rounded-md">
+          <button
+            className="bg-purple-600 text-white px-4 py-3 flex items-center gap-2 font-bold text-sm rounded-lg"
+            onClick={addEvent}
+          >
             Add Event <FaPlus size={14} />
           </button>
         </div>
@@ -94,11 +101,10 @@ const Events = () => {
             <tr>
               {[
                 "Event Type",
-                "Event Organizer",
+                "Event Name",
                 "Location",
                 "Description",
                 "Ticket Purchased",
-                "Activity",
                 "Action",
               ].map((title, index) => (
                 <th key={index} className="pl-4 text-white py-5">
@@ -118,13 +124,6 @@ const Events = () => {
                 <td className="pl-4 py-3">{event.location}</td>
                 <td className="pl-4 py-3">{event.description}</td>
                 <td className="pl-4 py-3">{event.ticketPurchased}</td>
-                <td className="pl-4 py-3">
-                  {event.active ? (
-                    <span className="text-green-500">Active</span>
-                  ) : (
-                    <span className="text-red-500">Inactive</span>
-                  )}
-                </td>
                 <td className="relative">
                   <span className="flex items-center justify-center cursor-pointer overflow-hidden">
                     <HiOutlineDotsHorizontal

@@ -11,7 +11,7 @@ interface FilterModalProps {
   setFilteredUsers: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({
+const FilterUsers: React.FC<FilterModalProps> = ({
   hideFilterModal,
   setFilteredUsers,
 }) => {
@@ -178,4 +178,4 @@ const FilterModal: React.FC<FilterModalProps> = ({
   );
 };
 
-export default FilterModal;
+export default FilterUsers;

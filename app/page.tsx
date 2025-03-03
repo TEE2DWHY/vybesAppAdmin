@@ -17,16 +17,16 @@ const Page: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const [formData, setFormData] = useState<FormData>({
-    email: "",
+    email: "admin@vybesapp.com",
     password: "",
   });
 
-  useEffect(() => {
-    const token = cookie.getCookie("token");
-    if (token) {
-      router.replace("/dashboard");
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = cookie.getCookie("token");
+  //   if (token) {
+  //     router.replace("/dashboard");
+  //   }
+  // }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -93,6 +93,7 @@ const Page: React.FC = () => {
                 value={formData.email}
                 name="email"
                 onChange={handleChange}
+                readOnly
               />
               <label className="text-base">Password</label>
               <input

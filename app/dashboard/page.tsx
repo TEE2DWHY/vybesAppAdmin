@@ -4,20 +4,29 @@ import SideBar from "./components/SideBar";
 import Users from "./components/Users";
 import Events from "./components/Events";
 import Payments from "./components/Payments";
-import FilterModal from "./components/modals/FilterModal";
+import FilterUsers from "./components/modals/FilterUsers";
 import AuthWrapper from "@/utils/AuthWrapper";
 import { User } from "@/types";
+import FilterEvents from "./components/modals/addEvent";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
-  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showFilterUsersModal, setShowFilterUsersModal] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [showFilterEventModal, setShowFilterEventModal] = useState(false);
 
   return (
     <AuthWrapper>
-      {showFilterModal && (
-        <FilterModal
-          hideFilterModal={() => setShowFilterModal(false)}
+      {showFilterEventModal && (
+        <FilterEvents
+          hideAddModal={() => setShowFilterEventModal(false)}
+          filteredUsers={filteredUsers}
+          setFilteredUsers={setFilteredUsers}
+        />
+      )}
+      {showFilterUsersModal && (
+        <FilterUsers
+          hideFilterModal={() => setShowFilterUsersModal(false)}
           filteredUsers={filteredUsers}
           setFilteredUsers={setFilteredUsers}
         />
@@ -26,12 +35,14 @@ export default function Page() {
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
         {activeTab === "users" && (
           <Users
-            filterModal={() => setShowFilterModal(true)}
+            filterModal={() => setShowFilterUsersModal(true)}
             filteredUser={filteredUsers}
             setFilteredUser={setFilteredUsers}
           />
         )}
-        {activeTab === "events" && <Events />}
+        {activeTab === "events" && (
+          <Events addEvent={() => setShowFilterEventModal(true)} />
+        )}
         {activeTab === "payments" && <Payments />}
       </div>
     </AuthWrapper>
