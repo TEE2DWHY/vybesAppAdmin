@@ -98,8 +98,6 @@ const Users: React.FC<UserProps> = ({
     (user: User) => user?.accountType === "baddie"
   );
 
-  console.log(filteredUser);
-
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
       <div className="border border-gray-300 py-4 px-8 rounded-xl">

@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import { User } from "@/types";
 import { GiCancel } from "react-icons/gi";
 import { IoIosArrowDown } from "react-icons/io";
-import { MdOutlineUploadFile } from "react-icons/md";
 
 interface FilterModalProps {
   hideAddModal: () => void;
@@ -25,6 +24,11 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
   const [image, setImage] = useState<File | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [tickets, setTickets] = useState([
+    { type: "Regular", price: "", available: "" },
+    { type: "VIP", price: "", available: "" },
+    { type: "VVIP", price: "", available: "" },
+  ]);
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
 
@@ -50,6 +54,16 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
     }
   };
 
+  const handleTicketChange = (
+    index: number,
+    field: keyof (typeof tickets)[0],
+    value: string
+  ) => {
+    const updatedTickets = [...tickets];
+    updatedTickets[index][field] = value;
+    setTickets(updatedTickets);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -59,9 +73,15 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
       !eventType ||
       !eventDescription ||
       !eventLocation ||
-      !image
+      !image ||
+      tickets.some((ticket) => !ticket.price || !ticket.available)
     ) {
-      messageApi.error("Please fill in all fields and upload an image.");
+      messageApi.error(
+        <div className="font-[outfit]">
+          Please fill in all fields, upload an image, and provide ticket
+          details.
+        </div>
+      );
       return;
     }
 
@@ -70,13 +90,12 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
     formDataToSubmit.append("eventType", eventType);
     formDataToSubmit.append("eventDescription", eventDescription);
     formDataToSubmit.append("eventLocation", eventLocation);
-    formDataToSubmit.append(
-      "ticketPurchased",
-      formData.ticketPurchased.toString()
-    );
-    if (image) {
-      formDataToSubmit.append("eventImage", image);
-    }
+    formDataToSubmit.append("eventImage", image);
+
+    // Append ticket details
+    tickets.forEach((ticket) => {
+      formDataToSubmit.append("tickets", JSON.stringify(ticket));
+    });
 
     try {
       // Example: await adminInstance.post('/events', formDataToSubmit);
@@ -95,7 +114,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
         onClick={hideAddModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[30%] ml-20"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[30%] ml-20 h-[600px] overflow-y-scroll"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
@@ -130,15 +149,27 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
                   <div className="absolute z-10 bg-white border border-gray-700 rounded-lg w-full mt-1 overflow-hidden">
                     <div
                       className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("birthday")}
+                      onClick={() => handleSelectEventType("Birthday Parties")}
                     >
-                      Birthday Event
+                      Birthday Parties
                     </div>
                     <div
                       className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("nocup")}
+                      onClick={() => handleSelectEventType("In House Party")}
                     >
-                      No cup
+                      In House Party
+                    </div>
+                    <div
+                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
+                      onClick={() => handleSelectEventType("Get Together")}
+                    >
+                      Get Together
+                    </div>
+                    <div
+                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
+                      onClick={() => handleSelectEventType("No Cup Parties")}
+                    >
+                      No Cup Parties
                     </div>
                   </div>
                 )}
@@ -151,7 +182,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
                 value={formData.eventDescription}
                 onChange={handleChange}
                 placeholder="Enter Event Description"
-                className="border border-gray-500 rounded-md outline-none px-3 py-2 h-[100px] text-sm"
+                className="border border-gray-500 rounded-md outline-none px-3 py-2 h-[80px] text-sm"
               ></textarea>
             </div>
             <div className="flex flex-col gap-2 mb-4">
@@ -171,15 +202,35 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black"
+                className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black cursor-pointer"
               />
-              {/* <div className="flex items-center justify-center my-3">
-                <MdOutlineUploadFile
-                  size={40}
-                  cursor={"pointer"}
-                  className="border-2 border-gray-400 rounded-full p-2"
-                />
-              </div> */}
+            </div>
+            <div className="mb-4">
+              {tickets.map((ticket, index) => (
+                <div key={index} className="flex flex-col mb-4">
+                  <label className="text-sm">{ticket.type} Ticket</label>
+                  <div className="flex gap-2">
+                    <input
+                      type=" number"
+                      placeholder="Price"
+                      value={ticket.price}
+                      onChange={(e) =>
+                        handleTicketChange(index, "price", e.target.value)
+                      }
+                      className="border py-2 px-3 border-gray-500 rounded-lg w-full outline-none text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Available Tickets"
+                      value={ticket.available}
+                      onChange={(e) =>
+                        handleTicketChange(index, "available", e.target.value)
+                      }
+                      className="border py-2 px-3 border-gray-500 rounded-lg w-full outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="flex justify-end">
               <button
