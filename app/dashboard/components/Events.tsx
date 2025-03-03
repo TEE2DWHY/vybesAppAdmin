@@ -126,7 +126,7 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
         </div>
 
         {isLoading ? (
-          <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
+          <div className="h-[50vh] flex flex-col items-center justify-center text-base">
             <Image
               src={"/images/bubble.gif"}
               width={70}
@@ -152,7 +152,7 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
                   "Event Name",
                   "Location",
                   "Description",
-                  "Ticket Purchased",
+                  // "Ticket Purchased",
                   "Action",
                 ].map((title, index) => (
                   <th key={index} className="pl-4 text-white py-5">
@@ -173,7 +173,7 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
                   <td className="pl-4 py-3 capitalize">
                     {getFirstFiveWords(event.description)}
                   </td>
-                  <td className="pl-4 py-3">{event.ticketPurchased}</td>
+                  {/* <td className="pl-4 py-3">{event.ticketPurchased}</td> */}
                   <td className="relative">
                     <span className="flex items-center justify-center cursor-pointer overflow-hidden">
                       <HiOutlineDotsHorizontal

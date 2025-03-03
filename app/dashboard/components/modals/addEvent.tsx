@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { User } from "@/types";
 import { GiCancel } from "react-icons/gi";
 import { IoIosArrowDown } from "react-icons/io";
+import { MdOutlineUploadFile } from "react-icons/md";
 
 interface FilterModalProps {
   hideAddModal: () => void;
@@ -21,6 +22,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
     eventLocation: "",
     ticketPurchased: 0,
   });
+  const [image, setImage] = useState<File | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
   const token = cookie.getCookie("token");
@@ -42,10 +44,47 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImage(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
-    hideAddModal();
+
+    const { eventName, eventType, eventDescription, eventLocation } = formData;
+    if (
+      !eventName ||
+      !eventType ||
+      !eventDescription ||
+      !eventLocation ||
+      !image
+    ) {
+      messageApi.error("Please fill in all fields and upload an image.");
+      return;
+    }
+
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("eventName", eventName);
+    formDataToSubmit.append("eventType", eventType);
+    formDataToSubmit.append("eventDescription", eventDescription);
+    formDataToSubmit.append("eventLocation", eventLocation);
+    formDataToSubmit.append(
+      "ticketPurchased",
+      formData.ticketPurchased.toString()
+    );
+    if (image) {
+      formDataToSubmit.append("eventImage", image);
+    }
+
+    try {
+      // Example: await adminInstance.post('/events', formDataToSubmit);
+      console.log("Form submitted successfully:", formDataToSubmit);
+      hideAddModal();
+    } catch (error) {
+      messageApi.error("Failed to create event. Please try again.");
+    }
   };
 
   return (
@@ -88,7 +127,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
                   <IoIosArrowDown className="cursor-pointer" />
                 </div>
                 {isDropdownOpen && (
-                  <div className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full mt-1 overflow-hidden">
+                  <div className="absolute z-10 bg-white border border-gray-700 rounded-lg w-full mt-1 overflow-hidden">
                     <div
                       className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
                       onClick={() => handleSelectEventType("birthday")}
@@ -125,6 +164,22 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
                 placeholder="Enter Event Location"
                 className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black"
               />
+            </div>
+            <div className="mb-3">
+              <label className="text-sm">Upload Event Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black"
+              />
+              {/* <div className="flex items-center justify-center my-3">
+                <MdOutlineUploadFile
+                  size={40}
+                  cursor={"pointer"}
+                  className="border-2 border-gray-400 rounded-full p-2"
+                />
+              </div> */}
             </div>
             <div className="flex justify-end">
               <button
