@@ -1,14 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdSearch } from "react-icons/io";
-import { CiFilter } from "react-icons/ci";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import { FaChevronRight } from "react-icons/fa6";
-import { events } from "@/data/events";
+import { createAdminInstance } from "@/config/axios";
+import { cookie } from "@/utils/storage";
+import Image from "next/image";
+import { Empty } from "antd";
 
 interface EventsProps {
   addEvent: () => void;
+}
+
+interface Event {
+  eventType: string;
+  name: string;
+  location: string;
+  description: string;
+  ticketPurchased: number;
 }
 
 const Events: React.FC<EventsProps> = ({ addEvent }) => {
@@ -17,8 +27,42 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const [eventData, setEventData] = useState<Event[] | null>(null);
+  const [totalPage, setTotalPage] = useState<number | null>(null);
+  const [pageNumbers, setPageNumbers] = useState<number[]>([]);
 
-  const filteredEvents = events.filter((event) => {
+  const token = cookie.getCookie("token");
+  const adminInstance = createAdminInstance(token);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await adminInstance.get("/all-events", {
+          params: {
+            page: pagination,
+            eventType: eventType,
+          },
+        });
+
+        console.log(response.data);
+        setEventData(response.data.payload?.events);
+        setTotalPage(response.data.payload?.totalPage);
+        setPageNumbers(
+          Array.from(
+            { length: response.data.payload?.totalPage },
+            (_, i) => i + 1
+          )
+        );
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [pagination, eventType]);
+
+  const filteredEvents = eventData?.filter((event) => {
     if (eventType === "All") return true;
     return event.eventType.toLowerCase() === eventType.toLowerCase();
   });
@@ -27,9 +71,15 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
     setSelectedEventIndex(selectedEventIndex === index ? null : index);
   };
 
+  const getFirstFiveWords = (description: string): string => {
+    const words = description.split(" ");
+    const firstFiveWords = words.slice(0, 5);
+    return `${firstFiveWords.join(" ")}....`;
+  };
+
   return (
-    <div className="w-[84%] px-4 py-5 h-screen  overflow-y-scroll">
-      <div className="border border-gray-300 py-12 px-8 rounded-xl">
+    <div className="w-[84%] px-4 py-3 h-screen overflow-y-scroll">
+      <div className="border border-gray-300 py-6 px-8 rounded-xl">
         <div className="border-b border-gray-100 pb-2 flex justify-between">
           <h1 className="text-3xl font-bold">Events</h1>
           <button
@@ -39,39 +89,24 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
             Add Event <FaPlus size={14} />
           </button>
         </div>
+
         <div className="flex justify-between items-center pt-6 border-t border-gray-300">
           <ul className="flex gap-10 text-base">
-            <li
-              className={`${
-                eventType === "All"
-                  ? "text-purple-500 font-bold"
-                  : "text-[#BFBFBF]"
-              } cursor-pointer`}
-              onClick={() => setEventType("All")}
-            >
-              All
-            </li>
-            <li
-              className={`${
-                eventType === "Birthday Parties"
-                  ? "text-purple-500 font-bold"
-                  : "text-[#BFBFBF]"
-              } cursor-pointer`}
-              onClick={() => setEventType("Birthday Parties")}
-            >
-              Birthday Parties
-            </li>
-            <li
-              className={`${
-                eventType === "No Cup Parties"
-                  ? "text-purple-500 font-bold"
-                  : "text-[#BFBFBF]"
-              } cursor-pointer`}
-              onClick={() => setEventType("No Cup Parties")}
-            >
-              No Cup Parties
-            </li>
+            {["All", "Birthday Parties", "No-Cup Parties"].map((type) => (
+              <li
+                key={type}
+                className={`${
+                  eventType === type
+                    ? "text-purple-500 font-bold"
+                    : "text-[#BFBFBF]"
+                } cursor-pointer`}
+                onClick={() => setEventType(type)}
+              >
+                {type}
+              </li>
+            ))}
           </ul>
+
           <div className="flex gap-10 items-center">
             <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
               <label htmlFor="submit">
@@ -79,131 +114,129 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
               </label>
               <input
                 type="text"
-                placeholder="Search For Event By Organizer"
-                className="outline-none flex-1 bg-transparent text-[#BCC1CA] text-base"
+                placeholder="Search For Event By Event Name"
+                className="outline-none flex-1 bg-transparent text-[#BCC1CA] w-[170px] text-sm"
                 required
               />
               <button id="submit" className="hidden">
                 Submit
               </button>
             </form>
-            <div className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer">
-              <CiFilter size={24} color="#565E6C" />
-              <span className="text-[#565E6C]">Filter</span>
-            </div>
           </div>
         </div>
-        <table
-          className="my-14 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
-          onClick={() => setSelectedEventIndex(null)}
-        >
-          <thead className="text-left bg-purple-500 ">
-            <tr>
-              {[
-                "Event Type",
-                "Event Name",
-                "Location",
-                "Description",
-                "Ticket Purchased",
-                "Action",
-              ].map((title, index) => (
-                <th key={index} className="pl-4 text-white py-5">
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-purple-50">
-            {filteredEvents.map((event, index) => (
-              <tr
-                key={index}
-                className="border-b border-gray-200 text-gray-600"
-              >
-                <td className="pl-4 py-3">{event.eventType}</td>
-                <td className="pl-4 py-3">{event.organizer}</td>
-                <td className="pl-4 py-3">{event.location}</td>
-                <td className="pl-4 py-3">{event.description}</td>
-                <td className="pl-4 py-3">{event.ticketPurchased}</td>
-                <td className="relative">
-                  <span className="flex items-center justify-center cursor-pointer overflow-hidden">
-                    <HiOutlineDotsHorizontal
-                      size={24}
-                      cursor={"pointer"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleModal(index);
-                      }}
-                    />
-                  </span>
-                  {selectedEventIndex === index && (
-                    <ul
-                      className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <li className="cursor-pointer">View Details</li>
-                      <li className="cursor-pointer">Edit Details</li>
-                      <li className="cursor-pointer">Delete Event</li>
-                    </ul>
-                  )}
-                </td>
+
+        {isLoading ? (
+          <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
+            <Image
+              src={"/images/bubble.gif"}
+              width={70}
+              height={70}
+              unoptimized
+              alt="loading-img"
+            />
+            Fetching Data...
+          </div>
+        ) : eventData && eventData.length === 0 ? (
+          <div className="h-[50vh] flex items-center justify-center text-gray-600 text-lg">
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              className="font-[outfit] capitalize"
+            />
+          </div>
+        ) : (
+          <table className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden">
+            <thead className="text-left bg-purple-500 ">
+              <tr>
+                {[
+                  "Event Type",
+                  "Event Name",
+                  "Location",
+                  "Description",
+                  "Ticket Purchased",
+                  "Action",
+                ].map((title, index) => (
+                  <th key={index} className="pl-4 text-white py-5">
+                    {title}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <ul className="flex justify-center items-center gap-6">
-          <FaAngleLeft
-            size={16}
-            color="#1b1b1b"
-            cursor={"pointer"}
-            onClick={() => setPagination((prev) => (prev <= 1 ? 5 : prev - 1))}
-          />
-          <li
-            className={`${
-              pagination === 1 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(1)}
-          >
-            1
-          </li>
-          <li
-            className={`${
-              pagination === 2 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(2)}
-          >
-            2
-          </li>
-          <li
-            className={`${
-              pagination === 3 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(3)}
-          >
-            3
-          </li>
-          <li
-            className={`${
-              pagination === 4 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(4)}
-          >
-            4
-          </li>
-          <li
-            className={`${
-              pagination === 5 ? "bg-purple-500" : "bg-gray-500"
-            } rounded-md text-white px-3 py-1 cursor-pointer`}
-            onClick={() => setPagination(5)}
-          >
-            5
-          </li>
-          <FaChevronRight
-            size={16}
-            color="#1b1b1b"
-            onClick={() => setPagination((prev) => (prev >= 5 ? 1 : prev + 1))}
-            cursor={"pointer"}
-          />
-        </ul>
+            </thead>
+            <tbody className="bg-purple-50">
+              {filteredEvents?.map((event, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-200 text-gray-600"
+                >
+                  <td className="pl-4 py-3">{event.eventType}</td>
+                  <td className="pl-4 py-3 capitalize">{event.name}</td>
+                  <td className="pl-4 py-3">{event.location}</td>
+                  <td className="pl-4 py-3 capitalize">
+                    {getFirstFiveWords(event.description)}
+                  </td>
+                  <td className="pl-4 py-3">{event.ticketPurchased}</td>
+                  <td className="relative">
+                    <span className="flex items-center justify-center cursor-pointer overflow-hidden">
+                      <HiOutlineDotsHorizontal
+                        size={24}
+                        cursor={"pointer"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleModal(index);
+                        }}
+                      />
+                    </span>
+                    {selectedEventIndex === index && (
+                      <ul
+                        className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <li className="cursor-pointer">View Details</li>
+                        <li className="cursor-pointer">Edit Details</li>
+                        <li className="cursor-pointer">Delete Event</li>
+                      </ul>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {isLoading ||
+          (eventData && eventData.length !== 0 && (
+            <ul className="flex justify-center items-center gap-6">
+              <FaAngleLeft
+                size={16}
+                color="#1b1b1b"
+                cursor={"pointer"}
+                onClick={() =>
+                  setPagination((prev) => (prev <= 1 ? 1 : prev - 1))
+                }
+              />
+              {pageNumbers.map((page) => (
+                <li
+                  key={page}
+                  className={`${
+                    pagination === page ? "bg-purple-500" : "bg-gray-500"
+                  } rounded-md text-white px-3 py-1 cursor-pointer`}
+                  onClick={() => setPagination(page)}
+                >
+                  {page}
+                </li>
+              ))}
+              <FaChevronRight
+                size={16}
+                color="#1b1b1b"
+                cursor={"pointer"}
+                onClick={() =>
+                  setPagination((prev) =>
+                    totalPage !== null && prev >= totalPage
+                      ? totalPage
+                      : prev + 1
+                  )
+                }
+              />
+            </ul>
+          ))}
       </div>
     </div>
   );

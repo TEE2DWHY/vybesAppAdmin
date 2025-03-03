@@ -61,7 +61,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
             <div className="w-full font-bold">New Event</div>
-            <div className="font-bold cursor-pointer" onClick={hideAddModal}>
+            <div className="cursor-pointer" onClick={hideAddModal}>
               <GiCancel />
             </div>
           </div>
