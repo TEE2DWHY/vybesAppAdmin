@@ -10,11 +10,23 @@ export const authInstance = axios.create({
 });
 
 export const createAdminInstance = (token: string) => {
-  return axios.create({
+  const instance = axios.create({
     baseURL: `${BASE_URL}/admin`,
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
   });
+
+  // Add a request interceptor
+  instance.interceptors.request.use((config) => {
+    // Check if the data is FormData
+    if (config.data instanceof FormData) {
+      // Do not set Content-Type for FormData
+      delete config.headers["Content-Type"];
+    }
+    return config;
+  });
+
+  return instance;
 };

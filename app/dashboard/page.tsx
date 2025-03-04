@@ -7,21 +7,23 @@ import Payments from "./components/Payments";
 import FilterUsers from "./components/modals/FilterUsers";
 import AuthWrapper from "@/utils/AuthWrapper";
 import { User } from "@/types";
-import FilterEvents from "./components/modals/addEvent";
+import AddEvent from "./components/modals/AddEvent";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
   const [showFilterUsersModal, setShowFilterUsersModal] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showFilterEventModal, setShowFilterEventModal] = useState(false);
+  const [refetchEvents, setRefetchEvents] = useState(false);
 
   return (
     <AuthWrapper>
       {showFilterEventModal && (
-        <FilterEvents
+        <AddEvent
           hideAddModal={() => setShowFilterEventModal(false)}
           filteredUsers={filteredUsers}
           setFilteredUsers={setFilteredUsers}
+          setRefetchEvent={setRefetchEvents}
         />
       )}
       {showFilterUsersModal && (
@@ -41,7 +43,11 @@ export default function Page() {
           />
         )}
         {activeTab === "events" && (
-          <Events addEvent={() => setShowFilterEventModal(true)} />
+          <Events
+            addEvent={() => setShowFilterEventModal(true)}
+            refetchEvents={refetchEvents}
+            setRefetchEvent={setRefetchEvents}
+          />
         )}
         {activeTab === "payments" && <Payments />}
       </div>

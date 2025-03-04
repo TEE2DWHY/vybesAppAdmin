@@ -11,6 +11,8 @@ import { Empty } from "antd";
 
 interface EventsProps {
   addEvent: () => void;
+  setRefetchEvent: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchEvents: boolean;
 }
 
 interface Event {
@@ -21,7 +23,11 @@ interface Event {
   ticketPurchased: number;
 }
 
-const Events: React.FC<EventsProps> = ({ addEvent }) => {
+const Events: React.FC<EventsProps> = ({
+  addEvent,
+  refetchEvents,
+  setRefetchEvent,
+}) => {
   const [eventType, setEventType] = useState("All");
   const [pagination, setPagination] = useState(1);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(
@@ -35,32 +41,41 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await adminInstance.get("/all-events", {
-          params: {
-            page: pagination,
-            eventType: eventType,
-          },
-        });
+  const fetchAllEevents = async () => {
+    try {
+      const response = await adminInstance.get("/all-events", {
+        params: {
+          page: pagination,
+          eventType: eventType,
+        },
+      });
 
-        console.log(response.data);
-        setEventData(response.data.payload?.events);
-        setTotalPage(response.data.payload?.totalPage);
-        setPageNumbers(
-          Array.from(
-            { length: response.data.payload?.totalPage },
-            (_, i) => i + 1
-          )
-        );
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+      console.log(response.data);
+      setEventData(response.data.payload?.events);
+      setTotalPage(response.data.payload?.totalPage);
+      setPageNumbers(
+        Array.from(
+          { length: response.data.payload?.totalPage },
+          (_, i) => i + 1
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setRefetchEvent(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllEevents();
   }, [pagination, eventType]);
+
+  useEffect(() => {
+    if (refetchEvents) {
+      fetchAllEevents();
+    }
+  }, [refetchEvents]);
 
   const filteredEvents = eventData?.filter((event) => {
     if (eventType === "All") return true;
@@ -126,7 +141,7 @@ const Events: React.FC<EventsProps> = ({ addEvent }) => {
         </div>
 
         {isLoading ? (
-          <div className="h-[50vh] flex flex-col items-center justify-center text-base">
+          <div className="h-[50vh] flex flex-col items-center justify-center text-base font-medium">
             <Image
               src={"/images/bubble.gif"}
               width={70}

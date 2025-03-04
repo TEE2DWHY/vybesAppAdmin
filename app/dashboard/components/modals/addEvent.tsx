@@ -11,9 +11,13 @@ interface FilterModalProps {
   hideAddModal: () => void;
   filteredUsers: User[];
   setFilteredUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  setRefetchEvent: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
+const AddEvent: React.FC<FilterModalProps> = ({
+  hideAddModal,
+  setRefetchEvent,
+}) => {
   const [formData, setFormData] = useState({
     eventName: "",
     eventType: "",
@@ -66,6 +70,7 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted");
 
     const { eventName, eventType, eventDescription, eventLocation } = formData;
     if (
@@ -86,22 +91,27 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
     }
 
     const formDataToSubmit = new FormData();
-    formDataToSubmit.append("eventName", eventName);
+    formDataToSubmit.append("name", eventName);
     formDataToSubmit.append("eventType", eventType);
-    formDataToSubmit.append("eventDescription", eventDescription);
-    formDataToSubmit.append("eventLocation", eventLocation);
-    formDataToSubmit.append("eventImage", image);
+    formDataToSubmit.append("description", eventDescription);
+    formDataToSubmit.append("location", eventLocation);
+    formDataToSubmit.append("image", image);
 
-    // Append ticket details
-    tickets.forEach((ticket) => {
-      formDataToSubmit.append("tickets", JSON.stringify(ticket));
-    });
+    // Instead of appending each ticket as a string, append the entire tickets array as a JSON string
+    formDataToSubmit.append("tickets", JSON.stringify(tickets));
+
+    // Log FormData contents
+    for (let [key, value] of formDataToSubmit.entries()) {
+      console.log(key, value);
+    }
 
     try {
-      // Example: await adminInstance.post('/events', formDataToSubmit);
-      console.log("Form submitted successfully:", formDataToSubmit);
+      await adminInstance.post("/create-event", formDataToSubmit);
+      messageApi.success("Event created successfully!");
+      setRefetchEvent(true);
       hideAddModal();
     } catch (error) {
+      console.error("Error during submission:", error);
       messageApi.error("Failed to create event. Please try again.");
     }
   };
@@ -247,4 +257,4 @@ const FilterEvents: React.FC<FilterModalProps> = ({ hideAddModal }) => {
   );
 };
 
-export default FilterEvents;
+export default AddEvent;
