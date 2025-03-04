@@ -8,6 +8,7 @@ import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import Image from "next/image";
 import { Empty } from "antd";
+import { deleteItem } from "@/utils/triggerAdminRequest";
 
 interface EventsProps {
   addEvent: () => void;
@@ -16,6 +17,7 @@ interface EventsProps {
 }
 
 interface Event {
+  _id: string;
   eventType: string;
   name: string;
   location: string;
@@ -188,7 +190,6 @@ const Events: React.FC<EventsProps> = ({
                   <td className="pl-4 py-3 capitalize">
                     {getFirstFiveWords(event.description)}
                   </td>
-                  {/* <td className="pl-4 py-3">{event.ticketPurchased}</td> */}
                   <td className="relative">
                     <span className="flex items-center justify-center cursor-pointer overflow-hidden">
                       <HiOutlineDotsHorizontal
@@ -207,7 +208,15 @@ const Events: React.FC<EventsProps> = ({
                       >
                         <li className="cursor-pointer">View Details</li>
                         <li className="cursor-pointer">Edit Details</li>
-                        <li className="cursor-pointer">Delete Event</li>
+                        <li
+                          className="cursor-pointer"
+                          onClick={async () => {
+                            await deleteItem("/delete-event", event._id);
+                            setRefetchEvent(true);
+                          }}
+                        >
+                          Delete Event
+                        </li>
                       </ul>
                     )}
                   </td>
@@ -244,9 +253,7 @@ const Events: React.FC<EventsProps> = ({
                 cursor={"pointer"}
                 onClick={() =>
                   setPagination((prev) =>
-                    totalPage !== null && prev >= totalPage
-                      ? totalPage
-                      : prev + 1
+                    totalPage !== null && prev >= totalPage ? 1 : prev + 1
                   )
                 }
               />

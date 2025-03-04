@@ -97,10 +97,8 @@ const AddEvent: React.FC<FilterModalProps> = ({
     formDataToSubmit.append("location", eventLocation);
     formDataToSubmit.append("image", image);
 
-    // Instead of appending each ticket as a string, append the entire tickets array as a JSON string
     formDataToSubmit.append("tickets", JSON.stringify(tickets));
 
-    // Log FormData contents
     for (let [key, value] of formDataToSubmit.entries()) {
       console.log(key, value);
     }
