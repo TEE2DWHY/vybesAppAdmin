@@ -4,6 +4,8 @@ import { CiFilter } from "react-icons/ci";
 import { FaAngleLeft, FaChevronRight } from "react-icons/fa6";
 import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
+import Image from "next/image";
+import { Empty } from "antd";
 
 interface Transactions {
   _id: string;
@@ -11,14 +13,17 @@ interface Transactions {
   amount: string;
   transactionId: string;
   status: string;
+  transactionType: string;
   receiver: string;
+  createdAt: string;
 }
 
 const Payments = () => {
   const [txType, setTxType] = useState<string | null>("All");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [transactions, setTransactions] = useState<Transactions[] | null>([]);
   const [totalTransactionAmountInNaira, setTotalTransactionAmountInNaira] =
-    useState<string>("");
+    useState<Number | null>(null);
   const [allTransaction, setAllTransactions] = useState<string>("");
   const [totalPage, setTotalPage] = useState<number | null>(null);
   const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
@@ -33,7 +38,7 @@ const Payments = () => {
         const response = await adminInstance.get("/all-transactions", {
           params: {
             page: pagination,
-            txType: txType,
+            transactionType: txType,
           },
         });
         console.log(response);
@@ -45,6 +50,8 @@ const Payments = () => {
         setAllTransactions(response.data?.payload?.totalNoOfTransactions);
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchAllTransactions();
@@ -55,6 +62,15 @@ const Payments = () => {
       return alert("Price cannot be zero");
     }
     setFinalCoinPrice(inputCoinPrice);
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   return (
@@ -78,16 +94,19 @@ const Payments = () => {
             <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
               <div>
                 <h1 className="text-3xl text-white">
-                  {totalTransactionAmountInNaira}
+                  (₦){" "}
+                  {totalTransactionAmountInNaira !== null
+                    ? Math.ceil(totalTransactionAmountInNaira as number)
+                    : 0}
                 </h1>
                 <h4 className="capitalize text-white">Total in Naira</h4>
               </div>
             </div>
             <div className="rounded-md bg-gradient-to-r from-yellow-500 to-yellow-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
               <div>
-                <h1 className="text-3xl text-white">{finalCoinPrice}</h1>
+                <h1 className="text-3xl text-white"> (₦) {finalCoinPrice}</h1>
                 <h4 className="capitalize text-white">
-                  Current Vyber Coin Price (₦)
+                  Current Vyber Coin Price
                 </h4>
               </div>
             </div>
@@ -121,6 +140,16 @@ const Payments = () => {
                 onClick={() => setTxType("Transfer")}
               >
                 Transfer
+              </li>
+              <li
+                className={`${
+                  txType === "Deposit"
+                    ? "text-purple-500 font-bold"
+                    : "text-[#BFBFBF]"
+                } cursor-pointer`}
+                onClick={() => setTxType("Deposit")}
+              >
+                Deposit
               </li>
               <li
                 className={`${
@@ -171,69 +200,98 @@ const Payments = () => {
             </button>
           </div>
           <div className="my-6">
-            <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl">
-              <thead className="text-left bg-purple-500 ">
-                <tr>
-                  <th className="pl-4 text-white py-5">Amount</th>
-                  <th className="pl-4 text-white py-5">Transaction Id</th>
-                  <th className="pl-4 text-white py-5">Status</th>
-                  <th className="pl-4 text-white py-5">Sender</th>
-                  <th className="pl-4 text-white py-5">Receive</th>
-                </tr>
-              </thead>
-              <tbody className="bg-purple-50">
-                {transactions &&
-                  transactions.map((transaction, index) => (
-                    <tr key={index} className="border-b border-gray-200">
-                      <td className="pl-4 py-3 capitalize">
-                        {transaction.amount}
-                      </td>
-                      <td className="pl-4 py-3 capitalize">
-                        {transaction.transactionId}
-                      </td>
-                      <td className="pl-4 py-3 capitalize">
-                        {transaction.status}
-                      </td>
-                      <td className="pl-4 py-3 capitalize">
-                        {transaction.sender}
-                      </td>
-                      <td className="pl-4 py-3 capitalize">
-                        {transaction.receiver}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-
-            <ul className="flex justify-center items-center gap-6 mt-5">
-              <FaAngleLeft
-                size={16}
-                color="#1b1b1b"
-                cursor={"pointer"}
-                onClick={() =>
-                  setPagination((prev) => (prev <= 1 ? 1 : prev - 1))
-                }
-              />
-              {[1, 2, 3, 4, 5].map((page) => (
-                <li
-                  key={page}
-                  className={`${
-                    pagination === page ? "bg-purple-500" : "bg-gray-500"
-                  } rounded-md text-white px-3 py-1 cursor-pointer`}
-                  onClick={() => setPagination(page)}
-                >
-                  {page}
-                </li>
-              ))}
-              <FaChevronRight
-                size={16}
-                color="#1b1b1b"
-                cursor={"pointer"}
-                onClick={() =>
-                  setPagination((prev) => (prev >= 5 ? 5 : prev + 1))
-                }
-              />
-            </ul>
+            {isLoading ? (
+              <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
+                <Image
+                  src={"/images/bubble.gif"}
+                  width={70}
+                  height={70}
+                  unoptimized
+                  alt="loading-img"
+                />
+                Fetching Data...
+              </div>
+            ) : transactions && transactions.length === 0 ? (
+              <div className="h-[35vh] flex items-center justify-center text-gray-600 text-lg">
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  className="font-[outfit] capitalize"
+                />
+              </div>
+            ) : (
+              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl">
+                <thead className="text-left bg-purple-500 ">
+                  <tr>
+                    <th className="pl-4 text-white py-5">Amount</th>
+                    <th className="pl-4 text-white py-5">Id</th>
+                    <th className="pl-4 text-white py-5">Status</th>
+                    <th className="pl-4 text-white py-5">Sender</th>
+                    <th className="pl-4 text-white py-5">Receive</th>
+                    <th className="pl-4 text-white py-5">Type</th>
+                    <th className="pl-4 text-white py-5">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-purple-50">
+                  {transactions &&
+                    transactions.map((transaction, index) => (
+                      <tr key={index} className="border-b border-gray-200">
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.amount}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.transactionId}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.status}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.sender}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.receiver}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {transaction.transactionType}
+                        </td>
+                        <td className="pl-4 py-3 capitalize">
+                          {formatTime(transaction.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            )}
+            {transactions && transactions.length !== 0 && (
+              <ul className="flex justify-center items-center gap-6 mt-5">
+                <FaAngleLeft
+                  size={16}
+                  color="#1b1b1b"
+                  cursor={"pointer"}
+                  onClick={() =>
+                    setPagination((prev) => (prev <= 1 ? 1 : prev - 1))
+                  }
+                />
+                {[1, 2, 3, 4, 5].map((page) => (
+                  <li
+                    key={page}
+                    className={`${
+                      pagination === page ? "bg-purple-500" : "bg-gray-500"
+                    } rounded-md text-white px-3 py-1 cursor-pointer`}
+                    onClick={() => setPagination(page)}
+                  >
+                    {page}
+                  </li>
+                ))}
+                <FaChevronRight
+                  size={16}
+                  color="#1b1b1b"
+                  cursor={"pointer"}
+                  onClick={() =>
+                    setPagination((prev) => (prev >= 5 ? 5 : prev + 1))
+                  }
+                />
+              </ul>
+            )}
           </div>
         </div>
       </div>

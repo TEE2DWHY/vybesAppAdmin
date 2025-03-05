@@ -237,7 +237,6 @@ const Events: React.FC<EventsProps> = ({
           </table>
         )}
 
-        {/* Pagination */}
         {isLoading ||
           (eventData && eventData.length !== 0 && (
             <ul className="flex justify-center items-center gap-6">
