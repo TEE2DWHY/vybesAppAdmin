@@ -1,58 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoMdSearch } from "react-icons/io";
 import { CiFilter } from "react-icons/ci";
 import { FaAngleLeft, FaChevronRight } from "react-icons/fa6";
+import { createAdminInstance } from "@/config/axios";
+import { cookie } from "@/utils/storage";
+
+interface Transactions {
+  _id: string;
+  sender: string;
+  amount: string;
+  transactionId: string;
+  status: string;
+  receiver: string;
+}
 
 const Payments = () => {
   const [txType, setTxType] = useState<string | null>("All");
+  const [transactions, setTransactions] = useState<Transactions[] | null>([]);
+  const [totalTransactionAmountInNaira, setTotalTransactionAmountInNaira] =
+    useState<string>("");
+  const [allTransaction, setAllTransactions] = useState<string>("");
+  const [totalPage, setTotalPage] = useState<number | null>(null);
   const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
   const [finalCoinPrice, setFinalCoinPrice] = useState<number>(50);
-  const transactions = [
-    {
-      id: 1,
-      user: "User1",
-      amountInCoins: 6000,
-      type: "Purchase",
-      date: "2025-02-15",
-    },
-    {
-      id: 2,
-      user: "User2",
-      amountInCoins: 9000,
-      type: "Purchase",
-      date: "2025-02-17",
-    },
-    {
-      id: 3,
-      user: "User3",
-      amountInCoins: 15000,
-      type: "Conversion",
-      date: "2025-02-19",
-    },
-    {
-      id: 4,
-      user: "User4",
-      amountInCoins: 10000,
-      type: "Conversion",
-      date: "2025-03-19",
-    },
-    {
-      id: 5,
-      user: "User5",
-      amountInCoins: 8000,
-      type: "Transfer",
-      date: "2024-08-19",
-    },
-  ];
-
   const [pagination, setPagination] = useState(1);
+  const token = cookie.getCookie("token");
+  const adminInstance = createAdminInstance(token);
 
-  const totalTransactionAmountInCoins = transactions.reduce(
-    (sum, transaction) => sum + transaction.amountInCoins,
-    0
-  );
-
-  const totalTransactionAmountInNaira = totalTransactionAmountInCoins;
+  useEffect(() => {
+    const fetchAllTransactions = async () => {
+      try {
+        const response = await adminInstance.get("/all-transactions", {
+          params: {
+            page: pagination,
+            txType: txType,
+          },
+        });
+        console.log(response);
+        setTransactions(response.data?.payload?.transactions);
+        setTotalTransactionAmountInNaira(
+          response.data?.payload?.totalAmountTransactedInNaira
+        );
+        setTotalPage(response.data.payload?.totalPage);
+        setAllTransactions(response.data?.payload?.totalNoOfTransactions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchAllTransactions();
+  }, [pagination, txType]);
 
   const updateCoinPrice = () => {
     if (inputCoinPrice === 0) {
@@ -73,7 +69,7 @@ const Payments = () => {
           <div className="my-4 flex gap-8">
             <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
               <div>
-                <h1 className="text-3xl text-white">{transactions.length}</h1>
+                <h1 className="text-3xl text-white">{allTransaction}</h1>
                 <h4 className="capitalize text-white">
                   No of Total Transactions
                 </h4>
@@ -178,23 +174,34 @@ const Payments = () => {
             <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl">
               <thead className="text-left bg-purple-500 ">
                 <tr>
-                  <th className="pl-4 text-white py-5">User</th>
-                  <th className="pl-4 text-white py-5">Amount (Coins)</th>
-                  <th className="pl-4 text-white py-5">Amount (₦)</th>
-                  <th className="pl-4 text-white py-5">Type</th>
-                  <th className="pl-4 text-white py-5">Date</th>
+                  <th className="pl-4 text-white py-5">Amount</th>
+                  <th className="pl-4 text-white py-5">Transaction Id</th>
+                  <th className="pl-4 text-white py-5">Status</th>
+                  <th className="pl-4 text-white py-5">Sender</th>
+                  <th className="pl-4 text-white py-5">Receive</th>
                 </tr>
               </thead>
               <tbody className="bg-purple-50">
-                {transactions.map((transaction) => (
-                  <tr key={transaction.id} className="border-b border-gray-200">
-                    <td className="pl-4 py-3">{transaction.user}</td>
-                    <td className="pl-4 py-3">{transaction.amountInCoins}</td>
-                    <td className="pl-4 py-3">{transaction.amountInCoins}</td>
-                    <td className="pl-4 py-3">{transaction.type}</td>
-                    <td className="pl-4 py-3">{transaction.date}</td>
-                  </tr>
-                ))}
+                {transactions &&
+                  transactions.map((transaction, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="pl-4 py-3 capitalize">
+                        {transaction.amount}
+                      </td>
+                      <td className="pl-4 py-3 capitalize">
+                        {transaction.transactionId}
+                      </td>
+                      <td className="pl-4 py-3 capitalize">
+                        {transaction.status}
+                      </td>
+                      <td className="pl-4 py-3 capitalize">
+                        {transaction.sender}
+                      </td>
+                      <td className="pl-4 py-3 capitalize">
+                        {transaction.receiver}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
 

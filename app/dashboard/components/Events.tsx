@@ -51,8 +51,6 @@ const Events: React.FC<EventsProps> = ({
           eventType: eventType,
         },
       });
-
-      console.log(response.data);
       setEventData(response.data.payload?.events);
       setTotalPage(response.data.payload?.totalPage);
       setPageNumbers(
@@ -94,6 +92,19 @@ const Events: React.FC<EventsProps> = ({
     return `${firstFiveWords.join(" ")}....`;
   };
 
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deleteItem("/delete-event", eventId);
+      setRefetchEvent(true);
+
+      if (eventData && eventData.length === 1 && pagination > 1) {
+        setPagination((prev) => prev - 1);
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
   return (
     <div className="w-[84%] px-4 py-3 h-screen overflow-y-scroll">
       <div className="border border-gray-300 py-6 px-8 rounded-xl">
@@ -107,6 +118,7 @@ const Events: React.FC<EventsProps> = ({
           </button>
         </div>
 
+        {/* Filters and search form */}
         <div className="flex justify-between items-center pt-6 border-t border-gray-300">
           <ul className="flex gap-10 text-base">
             {["All", "Birthday Parties", "No-Cup Parties"].map((type) => (
@@ -161,7 +173,10 @@ const Events: React.FC<EventsProps> = ({
             />
           </div>
         ) : (
-          <table className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden">
+          <table
+            className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
+            onClick={() => setSelectedEventIndex(null)}
+          >
             <thead className="text-left bg-purple-500 ">
               <tr>
                 {[
@@ -169,7 +184,6 @@ const Events: React.FC<EventsProps> = ({
                   "Event Name",
                   "Location",
                   "Description",
-                  // "Ticket Purchased",
                   "Action",
                 ].map((title, index) => (
                   <th key={index} className="pl-4 text-white py-5">
@@ -210,10 +224,7 @@ const Events: React.FC<EventsProps> = ({
                         <li className="cursor-pointer">Edit Details</li>
                         <li
                           className="cursor-pointer"
-                          onClick={async () => {
-                            await deleteItem("/delete-event", event._id);
-                            setRefetchEvent(true);
-                          }}
+                          onClick={() => handleDeleteEvent(event._id)}
                         >
                           Delete Event
                         </li>
@@ -225,6 +236,8 @@ const Events: React.FC<EventsProps> = ({
             </tbody>
           </table>
         )}
+
+        {/* Pagination */}
         {isLoading ||
           (eventData && eventData.length !== 0 && (
             <ul className="flex justify-center items-center gap-6">
