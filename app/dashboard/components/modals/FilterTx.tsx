@@ -7,6 +7,7 @@ import { Transaction } from "@/types";
 
 interface FilterModalProps {
   hideFilterModal: () => void;
+  filteredTx: Transaction[];
   setFilteredTx: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
@@ -35,6 +36,7 @@ const FilterTx: React.FC<FilterModalProps> = ({
           status,
         },
       });
+      console.log(response.data.payload);
       setFilteredTx(response.data.payload?.transactions);
     } catch (error) {
       console.log(error);

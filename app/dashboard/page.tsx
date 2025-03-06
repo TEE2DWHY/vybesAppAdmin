@@ -32,7 +32,7 @@ export default function Page() {
       {showFilterTxModal && (
         <FilterTx
           hideFilterModal={() => setShowFilterTxModal(false)}
-          // filteredTx={filteredTx}
+          filteredTx={filteredTx}
           setFilteredTx={setFilteredTx}
         />
       )}
@@ -63,6 +63,8 @@ export default function Page() {
           <Payments
             setShowFilterTxModal={setShowFilterTxModal}
             showFilterTxModal={showFilterTxModal}
+            setTransactions={setFilteredTx}
+            transactions={filteredTx}
           />
         )}
       </div>

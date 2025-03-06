@@ -11,24 +11,31 @@ import { Transaction } from "@/types";
 interface PaymentEventProps {
   setShowFilterTxModal: React.Dispatch<React.SetStateAction<boolean>>;
   showFilterTxModal: boolean;
+  transactions: Transaction[];
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
 const Payments: React.FC<PaymentEventProps> = ({
   setShowFilterTxModal,
-  showFilterTxModal,
+  setTransactions,
+  transactions,
 }) => {
   const [txType, setTxType] = useState<string | null>("All");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [transactions, setTransactions] = useState<Transaction[] | null>([]);
   const [totalTransactionAmountInNaira, setTotalTransactionAmountInNaira] =
     useState<Number | null>(null);
   const [allTransaction, setAllTransactions] = useState<string>("");
-  const [totalPage, setTotalPage] = useState<number | null>(null);
+  const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([]);
+  const [totalPage, setTotalPage] = useState<number | null>(10); // Example total pages
   const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
   const [finalCoinPrice, setFinalCoinPrice] = useState<number>(50);
   const [pagination, setPagination] = useState(1);
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
+
+  useEffect(() => {
+    setPagination(1);
+  }, [txType]);
 
   useEffect(() => {
     const fetchAllTransactions = async () => {
@@ -70,6 +77,38 @@ const Payments: React.FC<PaymentEventProps> = ({
       hour12: true,
     });
   };
+
+  useEffect(() => {
+    const generatePageNumbers = () => {
+      if (totalPage && totalPage <= 5) {
+        setPageNumbers(Array.from({ length: totalPage }, (_, i) => i + 1));
+      } else {
+        const pages: (number | string)[] = [];
+        pages.push(1);
+        if (pagination > 4) {
+          pages.push("...");
+        }
+        const startPage = Math.max(2, pagination - 1);
+        const endPage = Math.min(totalPage ? totalPage - 1 : 0, pagination + 1);
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i);
+        }
+        if (totalPage !== null && pagination < totalPage - 2) {
+          pages.push("...");
+        }
+        if (totalPage !== null) {
+          pages.push(totalPage);
+        }
+        setPageNumbers(pages);
+      }
+    };
+
+    generatePageNumbers();
+  }, [pagination, totalPage]);
+
+  useEffect(() => {
+    setPagination(1);
+  }, [txType]);
 
   return (
     <>
@@ -226,7 +265,6 @@ const Payments: React.FC<PaymentEventProps> = ({
                   <tr>
                     <th className="pl-4 text-white py-5">Amount</th>
                     <th className="pl-4 text-white py-5">Transaction Id</th>
-                    {/* <th className="pl-4 text-white py-5">Status</th> */}
                     <th className="pl-4 text-white py-5">Sender</th>
                     <th className="pl-4 text-white py-5">Receive</th>
                     <th className="pl-4 text-white py-5">Type</th>
@@ -243,9 +281,6 @@ const Payments: React.FC<PaymentEventProps> = ({
                         <td className="pl-4 py-3 capitalize">
                           {transaction.transactionId}
                         </td>
-                        {/* <td className="pl-4 py-3 capitalize">
-                          {transaction.status}
-                        </td> */}
                         <td className="pl-4 py-3 capitalize">
                           {transaction.sender}
                         </td>
@@ -273,13 +308,15 @@ const Payments: React.FC<PaymentEventProps> = ({
                     setPagination((prev) => (prev <= 1 ? 1 : prev - 1))
                   }
                 />
-                {[1, 2, 3, 4, 5].map((page) => (
+                {pageNumbers.map((page, index) => (
                   <li
-                    key={page}
+                    key={index}
                     className={`${
                       pagination === page ? "bg-purple-500" : "bg-gray-500"
                     } rounded-md text-white px-3 py-1 cursor-pointer`}
-                    onClick={() => setPagination(page)}
+                    onClick={() =>
+                      typeof page === "number" && setPagination(page)
+                    }
                   >
                     {page}
                   </li>
@@ -289,7 +326,11 @@ const Payments: React.FC<PaymentEventProps> = ({
                   color="#1b1b1b"
                   cursor={"pointer"}
                   onClick={() =>
-                    setPagination((prev) => (prev >= 5 ? 5 : prev + 1))
+                    setPagination((prev) =>
+                      totalPage !== null && prev >= totalPage
+                        ? totalPage
+                        : prev + 1
+                    )
                   }
                 />
               </ul>
