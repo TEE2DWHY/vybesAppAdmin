@@ -32,9 +32,8 @@ export default function Page() {
       {showFilterTxModal && (
         <FilterTx
           hideFilterModal={() => setShowFilterTxModal(false)}
-          filteredTx={filteredTx}
+          // filteredTx={filteredTx}
           setFilteredTx={setFilteredTx}
-          setRefetchEvent={setRefetchEvents}
         />
       )}
       {showFilterUsersModal && (
