@@ -8,3 +8,14 @@ export interface User {
   walletBalance: string;
   active: boolean;
 }
+
+export interface Transaction {
+  _id: string;
+  sender: string;
+  amount: string;
+  transactionId: string;
+  // status: string;
+  transactionType: string;
+  receiver: string;
+  createdAt: string;
+}

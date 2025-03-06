@@ -6,8 +6,9 @@ import Events from "./components/Events";
 import Payments from "./components/Payments";
 import FilterUsers from "./components/modals/FilterUsers";
 import AuthWrapper from "@/utils/AuthWrapper";
-import { User } from "@/types";
+import { User, Transaction } from "@/types";
 import AddEvent from "./components/modals/AddEvent";
+import FilterTx from "./components/modals/FilterTx";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
@@ -15,6 +16,8 @@ export default function Page() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showFilterEventModal, setShowFilterEventModal] = useState(false);
   const [refetchEvents, setRefetchEvents] = useState(false);
+  const [showFilterTxModal, setShowFilterTxModal] = useState(false);
+  const [filteredTx, setFilteredTx] = useState<Transaction[]>([]);
 
   return (
     <AuthWrapper>
@@ -23,6 +26,14 @@ export default function Page() {
           hideAddModal={() => setShowFilterEventModal(false)}
           filteredUsers={filteredUsers}
           setFilteredUsers={setFilteredUsers}
+          setRefetchEvent={setRefetchEvents}
+        />
+      )}
+      {showFilterTxModal && (
+        <FilterTx
+          hideFilterModal={() => setShowFilterTxModal(false)}
+          filteredTx={filteredTx}
+          setFilteredTx={setFilteredTx}
           setRefetchEvent={setRefetchEvents}
         />
       )}
@@ -49,7 +60,12 @@ export default function Page() {
             setRefetchEvent={setRefetchEvents}
           />
         )}
-        {activeTab === "payments" && <Payments />}
+        {activeTab === "payments" && (
+          <Payments
+            setShowFilterTxModal={setShowFilterTxModal}
+            showFilterTxModal={showFilterTxModal}
+          />
+        )}
       </div>
     </AuthWrapper>
   );

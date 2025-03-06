@@ -6,22 +6,20 @@ import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import Image from "next/image";
 import { Empty } from "antd";
+import { Transaction } from "@/types";
 
-interface Transactions {
-  _id: string;
-  sender: string;
-  amount: string;
-  transactionId: string;
-  status: string;
-  transactionType: string;
-  receiver: string;
-  createdAt: string;
+interface PaymentEventProps {
+  setShowFilterTxModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showFilterTxModal: boolean;
 }
 
-const Payments = () => {
+const Payments: React.FC<PaymentEventProps> = ({
+  setShowFilterTxModal,
+  showFilterTxModal,
+}) => {
   const [txType, setTxType] = useState<string | null>("All");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [transactions, setTransactions] = useState<Transactions[] | null>([]);
+  const [transactions, setTransactions] = useState<Transaction[] | null>([]);
   const [totalTransactionAmountInNaira, setTotalTransactionAmountInNaira] =
     useState<Number | null>(null);
   const [allTransaction, setAllTransactions] = useState<string>("");
@@ -177,7 +175,10 @@ const Payments = () => {
                   Submit
                 </button>
               </form>
-              <div className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer">
+              <div
+                className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer"
+                onClick={() => setShowFilterTxModal(true)}
+              >
                 <CiFilter size={24} color="#565E6C" />
                 <span className="text-[#565E6C]">Filter</span>
               </div>
@@ -215,6 +216,7 @@ const Payments = () => {
               <div className="h-[35vh] flex items-center justify-center text-gray-600 text-lg">
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={`No ${txType} Data Found.`}
                   className="font-[outfit] capitalize"
                 />
               </div>
@@ -223,8 +225,8 @@ const Payments = () => {
                 <thead className="text-left bg-purple-500 ">
                   <tr>
                     <th className="pl-4 text-white py-5">Amount</th>
-                    <th className="pl-4 text-white py-5">Id</th>
-                    <th className="pl-4 text-white py-5">Status</th>
+                    <th className="pl-4 text-white py-5">Transaction Id</th>
+                    {/* <th className="pl-4 text-white py-5">Status</th> */}
                     <th className="pl-4 text-white py-5">Sender</th>
                     <th className="pl-4 text-white py-5">Receive</th>
                     <th className="pl-4 text-white py-5">Type</th>
@@ -241,9 +243,9 @@ const Payments = () => {
                         <td className="pl-4 py-3 capitalize">
                           {transaction.transactionId}
                         </td>
-                        <td className="pl-4 py-3 capitalize">
+                        {/* <td className="pl-4 py-3 capitalize">
                           {transaction.status}
-                        </td>
+                        </td> */}
                         <td className="pl-4 py-3 capitalize">
                           {transaction.sender}
                         </td>

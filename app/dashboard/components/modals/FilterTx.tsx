@@ -3,40 +3,39 @@ import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
 import React, { useState } from "react";
-import { User } from "@/types";
+import { Transaction } from "@/types";
 
 interface FilterModalProps {
   hideFilterModal: () => void;
-  filteredUsers: User[];
-  setFilteredUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  setFilteredTx: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
 const FilterTx: React.FC<FilterModalProps> = ({
   hideFilterModal,
-  setFilteredUsers,
+  setFilteredTx,
 }) => {
-  const [gender, setGender] = useState<string>("");
-  const [accountType, setAccountType] = useState<string>("");
-  const [walletBalance, setWalletBalance] = useState<string>("");
+  const [transactionType, setTransactionType] = useState<string>("");
+  const [amountRange, setAmountRange] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
 
   const applyFilters = async () => {
-    if (accountType === "" && gender === "" && walletBalance === "") {
+    if (transactionType === "" && amountRange === "" && status === "") {
       return messageApi.error(
         <div className="font-[outfit]">Please make a selection</div>
       );
     }
     try {
-      const response = await adminInstance.get("/filter-users", {
+      const response = await adminInstance.get("/filter-transactions", {
         params: {
-          accountType: accountType,
-          gender: gender,
-          walletBalance: walletBalance,
+          transactionType,
+          amountRange,
+          status,
         },
       });
-      setFilteredUsers(response.data.payload?.users);
+      setFilteredTx(response.data.payload?.transactions);
     } catch (error) {
       console.log(error);
     } finally {
@@ -65,45 +64,66 @@ const FilterTx: React.FC<FilterModalProps> = ({
             </div>
           </div>
           <div className="flex justify-between w-[85%]">
-            {/* Account Type Filter */}
             <div className="flex flex-col gap-2">
-              <span className="">Account Type</span>
+              <span className="">Transaction Type</span>
               <ul className="flex flex-col gap-2">
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="accountType"
-                    value="vyber"
-                    checked={accountType === "vyber"}
-                    onChange={() => setAccountType("vyber")}
+                    name="transactionType"
+                    value="Transfer"
+                    checked={transactionType === "Transfer"}
+                    onChange={() => setTransactionType("Transfer")}
                     className="accent-purple-600 cursor-pointer"
                   />
-                  Vyber
+                  Transfer
                 </li>
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="accountType"
-                    value="baddie"
-                    checked={accountType === "baddie"}
-                    onChange={() => setAccountType("baddie")}
+                    name="transactionType"
+                    value="Deposit"
+                    checked={transactionType === "Deposit"}
+                    onChange={() => setTransactionType("Deposit")}
                     className="accent-purple-600 cursor-pointer"
                   />
-                  Baddie
+                  Deposit
+                </li>
+                <li className="flex gap-1">
+                  <input
+                    type="radio"
+                    name="transactionType"
+                    value="Conversion"
+                    checked={transactionType === "Conversion"}
+                    onChange={() => setTransactionType("Conversion")}
+                    className="accent-purple-600 cursor-pointer"
+                  />
+                  Conversion
+                </li>
+                <li className="flex gap-1">
+                  <input
+                    type="radio"
+                    name="transactionType"
+                    value="All"
+                    checked={transactionType === "All"}
+                    onChange={() => setTransactionType("All")}
+                    className="accent-purple-600 cursor-pointer"
+                  />
+                  All
                 </li>
               </ul>
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="">Wallet Balance</span>
+              <span className="">Amount Range</span>
               <ul className="flex flex-col gap-2">
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="walletBalance"
+                    name="amountRange"
                     value="0 - 50"
-                    checked={walletBalance === "0 - 50"}
-                    onChange={() => setWalletBalance("0 - 50")}
+                    checked={amountRange === "0 - 50"}
+                    onChange={() => setAmountRange("0 - 50")}
                     className="accent-purple-600 cursor-pointer"
                   />
                   0 - 50
@@ -111,10 +131,10 @@ const FilterTx: React.FC<FilterModalProps> = ({
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="walletBalance"
+                    name="amountRange"
                     value="51 - 100"
-                    checked={walletBalance === "51 - 100"}
-                    onChange={() => setWalletBalance("51 - 100")}
+                    checked={amountRange === "51 - 100"}
+                    onChange={() => setAmountRange("51 - 100")}
                     className="accent-purple-600 cursor-pointer"
                   />
                   51 - 100
@@ -122,10 +142,10 @@ const FilterTx: React.FC<FilterModalProps> = ({
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="walletBalance"
+                    name="amountRange"
                     value="101 - 150"
-                    checked={walletBalance === "101 - 150"}
-                    onChange={() => setWalletBalance("101 - 150")}
+                    checked={amountRange === "101 - 150"}
+                    onChange={() => setAmountRange("101 - 150")}
                     className="accent-purple-600 cursor-pointer"
                   />
                   101 - 150
@@ -133,10 +153,10 @@ const FilterTx: React.FC<FilterModalProps> = ({
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="walletBalance"
+                    name="amountRange"
                     value="> 200"
-                    checked={walletBalance === "> 200"}
-                    onChange={() => setWalletBalance("> 200")}
+                    checked={amountRange === "> 200"}
+                    onChange={() => setAmountRange("> 200")}
                     className="accent-purple-600 cursor-pointer"
                   />
                   &gt; 200
@@ -145,29 +165,40 @@ const FilterTx: React.FC<FilterModalProps> = ({
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="">Gender</span>
+              <span className="">Status</span>
               <ul className="flex flex-col gap-2">
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="gender"
-                    value="male"
-                    checked={gender === "male"}
-                    onChange={() => setGender("male")}
+                    name="status"
+                    value="Pending"
+                    checked={status === "Pending"}
+                    onChange={() => setStatus("Pending")}
                     className="accent-purple-600 cursor-pointer"
                   />
-                  Male
+                  Pending
                 </li>
                 <li className="flex gap-1">
                   <input
                     type="radio"
-                    name="gender"
-                    value="female"
-                    checked={gender === "female"}
-                    onChange={() => setGender("female")}
+                    name="status"
+                    value="Completed"
+                    checked={status === "Completed"}
+                    onChange={() => setStatus("Completed")}
                     className="accent-purple-600 cursor-pointer"
                   />
-                  Female
+                  Completed
+                </li>
+                <li className="flex gap-1">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="Failed"
+                    checked={status === "Failed"}
+                    onChange={() => setStatus("Failed")}
+                    className="accent-purple-600 cursor-pointer"
+                  />
+                  Failed
                 </li>
               </ul>
             </div>
