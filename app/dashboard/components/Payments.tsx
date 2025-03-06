@@ -27,7 +27,7 @@ const Payments: React.FC<PaymentEventProps> = ({
     useState<Number | null>(null);
   const [allTransaction, setAllTransactions] = useState<string>("");
   const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([]);
-  const [totalPage, setTotalPage] = useState<number | null>(10); // Example total pages
+  const [totalPage, setTotalPage] = useState<number | null>();
   const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
   const [finalCoinPrice, setFinalCoinPrice] = useState<number>(50);
   const [pagination, setPagination] = useState(1);
@@ -306,7 +306,9 @@ const Payments: React.FC<PaymentEventProps> = ({
                   cursor={"pointer"}
                   onClick={() =>
                     setPagination((prev) =>
-                      totalPage !== null && prev >= totalPage
+                      totalPage !== null &&
+                      totalPage !== undefined &&
+                      prev >= totalPage
                         ? totalPage
                         : prev + 1
                     )
