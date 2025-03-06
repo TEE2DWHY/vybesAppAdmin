@@ -34,33 +34,30 @@ const Payments: React.FC<PaymentEventProps> = ({
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
 
-  useEffect(() => {
-    setPagination(1);
-  }, [txType]);
+  const fetchAllTransactions = async (page: number) => {
+    setIsLoading(true);
+    try {
+      const response = await adminInstance.get("/all-transactions", {
+        params: {
+          page: page,
+          transactionType: txType,
+        },
+      });
+      setTransactions(response.data?.payload?.transactions);
+      setTotalTransactionAmountInNaira(
+        response.data?.payload?.totalAmountTransactedInNaira
+      );
+      setTotalPage(response.data.payload?.totalPage);
+      setAllTransactions(response.data?.payload?.totalNoOfTransactions);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAllTransactions = async () => {
-      try {
-        const response = await adminInstance.get("/all-transactions", {
-          params: {
-            page: pagination,
-            transactionType: txType,
-          },
-        });
-        console.log(response);
-        setTransactions(response.data?.payload?.transactions);
-        setTotalTransactionAmountInNaira(
-          response.data?.payload?.totalAmountTransactedInNaira
-        );
-        setTotalPage(response.data.payload?.totalPage);
-        setAllTransactions(response.data?.payload?.totalNoOfTransactions);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAllTransactions();
+    fetchAllTransactions(pagination);
   }, [pagination, txType]);
 
   const updateCoinPrice = () => {
@@ -85,9 +82,10 @@ const Payments: React.FC<PaymentEventProps> = ({
     }
   }, [pagination, totalPage]);
 
-  useEffect(() => {
+  const handleTxTypeChange = (type: string) => {
+    setTxType(type);
     setPagination(1);
-  }, [txType]);
+  };
 
   return (
     <>
@@ -137,46 +135,19 @@ const Payments: React.FC<PaymentEventProps> = ({
           </div>
           <div className="flex justify-between items-center pt-0 border-t border-gray-300">
             <ul className="flex gap-10 text-base">
-              <li
-                className={`${
-                  txType === "All"
-                    ? "text-purple-500 font-bold"
-                    : "text-[#BFBFBF]"
-                } cursor-pointer`}
-                onClick={() => setTxType("All")}
-              >
-                All
-              </li>
-              <li
-                className={`${
-                  txType === "Transfer"
-                    ? "text-purple-500 font-bold"
-                    : "text-[#BFBFBF]"
-                } cursor-pointer`}
-                onClick={() => setTxType("Transfer")}
-              >
-                Transfer
-              </li>
-              <li
-                className={`${
-                  txType === "Deposit"
-                    ? "text-purple-500 font-bold"
-                    : "text-[#BFBFBF]"
-                } cursor-pointer`}
-                onClick={() => setTxType("Deposit")}
-              >
-                Deposit
-              </li>
-              <li
-                className={`${
-                  txType === "Conversion"
-                    ? "text-purple-500 font-bold"
-                    : "text-[#BFBFBF]"
-                } cursor-pointer`}
-                onClick={() => setTxType("Conversion")}
-              >
-                Conversion
-              </li>
+              {["All", "Transfer", "Deposit", "Conversion"].map((type) => (
+                <li
+                  key={type}
+                  className={`${
+                    txType === type
+                      ? "text-purple-500 font-bold"
+                      : "text-[#BFBFBF]"
+                  } cursor-pointer`}
+                  onClick={() => handleTxTypeChange(type)}
+                >
+                  {type}
+                </li>
+              ))}
             </ul>
             <div className="flex gap-10 items-center justify-end mt-6">
               <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
@@ -245,7 +216,7 @@ const Payments: React.FC<PaymentEventProps> = ({
                     <th className="pl-4 text-white py-5">Amount</th>
                     <th className="pl-4 text-white py-5">Transaction Id</th>
                     <th className="pl-4 text-white py-5">Sender</th>
-                    <th className="pl-4 text-white py-5">Receive</th>
+                    <th className="pl-4 text-white py-5">Receiver</th>
                     <th className="pl-4 text-white py-5">Type</th>
                     <th className="pl-4 text-white py-5">Time</th>
                   </tr>
