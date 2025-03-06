@@ -18,11 +18,8 @@ export const createAdminInstance = (token: string) => {
     },
   });
 
-  // Add a request interceptor
   instance.interceptors.request.use((config) => {
-    // Check if the data is FormData
     if (config.data instanceof FormData) {
-      // Do not set Content-Type for FormData
       delete config.headers["Content-Type"];
     }
     return config;
