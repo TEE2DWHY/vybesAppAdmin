@@ -30,7 +30,7 @@ const Payments: React.FC<PaymentEventProps> = ({
   const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([]);
   const [totalPage, setTotalPage] = useState<number | null>();
   const [inputCoinPrice, setInputCoinPrice] = useState<number | null>();
-  const [finalCoinPrice, setFinalCoinPrice] = useState<number>();
+  const [price, setPrice] = useState<number>();
   const [pagination, setPagination] = useState(1);
   const token = cookie.getCookie("token");
   const [messageApi, contextHolder] = message.useMessage();
@@ -51,7 +51,7 @@ const Payments: React.FC<PaymentEventProps> = ({
       );
       setTotalPage(response.data.payload?.totalPage);
       setAllTransactions(response.data?.payload?.totalNoOfTransactions);
-      setFinalCoinPrice(response.data?.payload?.price);
+      setPrice(response.data?.payload?.price);
     } catch (error) {
       console.log(error);
     } finally {
@@ -64,16 +64,16 @@ const Payments: React.FC<PaymentEventProps> = ({
   }, [pagination, txType]);
 
   const updateCoinPrice = async () => {
-    if (inputCoinPrice === 0) {
+    if (inputCoinPrice === 0 || !inputCoinPrice) {
       return messageApi.error(
-        <div className="font-[outfit]">Price cannot be zero.</div>
+        <div className="font-[outfit]">Please provide valid price.</div>
       );
     }
     try {
       const response = await adminInstance.post("/set-price", {
         price: inputCoinPrice,
       });
-      setFinalCoinPrice(response.data?.payload);
+      setPrice(response.data?.payload);
       setInputCoinPrice(null);
     } catch (error) {
       console.log(error);
@@ -132,7 +132,7 @@ const Payments: React.FC<PaymentEventProps> = ({
             </div>
             <div className="rounded-md bg-gradient-to-r from-yellow-500 to-yellow-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
               <div>
-                <h1 className="text-3xl text-white"> (₦) {finalCoinPrice}</h1>
+                <h1 className="text-3xl text-white"> (₦) {price}</h1>
                 <h4 className="capitalize text-white">
                   Current Vyber Coin Price
                 </h4>
