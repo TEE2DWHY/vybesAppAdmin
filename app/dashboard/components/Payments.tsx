@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Empty } from "antd";
 import { Transaction } from "@/types";
 import { generatePageNumbers } from "@/utils/generatePageNumbers";
+import { message } from "antd";
 
 interface PaymentEventProps {
   setShowFilterTxModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,10 +29,11 @@ const Payments: React.FC<PaymentEventProps> = ({
   const [allTransaction, setAllTransactions] = useState<string>("");
   const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([]);
   const [totalPage, setTotalPage] = useState<number | null>();
-  const [inputCoinPrice, setInputCoinPrice] = useState<number>(50);
-  const [finalCoinPrice, setFinalCoinPrice] = useState<number>(50);
+  const [inputCoinPrice, setInputCoinPrice] = useState<number | null>();
+  const [finalCoinPrice, setFinalCoinPrice] = useState<number>();
   const [pagination, setPagination] = useState(1);
   const token = cookie.getCookie("token");
+  const [messageApi, contextHolder] = message.useMessage();
   const adminInstance = createAdminInstance(token);
 
   const fetchAllTransactions = async (page: number) => {
@@ -49,6 +51,7 @@ const Payments: React.FC<PaymentEventProps> = ({
       );
       setTotalPage(response.data.payload?.totalPage);
       setAllTransactions(response.data?.payload?.totalNoOfTransactions);
+      setFinalCoinPrice(response.data?.payload?.price);
     } catch (error) {
       console.log(error);
     } finally {
@@ -60,11 +63,21 @@ const Payments: React.FC<PaymentEventProps> = ({
     fetchAllTransactions(pagination);
   }, [pagination, txType]);
 
-  const updateCoinPrice = () => {
+  const updateCoinPrice = async () => {
     if (inputCoinPrice === 0) {
-      return alert("Price cannot be zero");
+      return messageApi.error(
+        <div className="font-[outfit]">Price cannot be zero.</div>
+      );
     }
-    setFinalCoinPrice(inputCoinPrice);
+    try {
+      const response = await adminInstance.post("/set-price", {
+        price: inputCoinPrice,
+      });
+      setFinalCoinPrice(response.data?.payload);
+      setInputCoinPrice(null);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const formatTime = (dateString: string) => {
@@ -89,6 +102,7 @@ const Payments: React.FC<PaymentEventProps> = ({
 
   return (
     <>
+      {contextHolder}
       <div className="w-[84%] px-4 py-5 h-screen overflow-y-scroll">
         <div className="border border-gray-300 py-2 px-8 rounded-xl">
           <div>
@@ -177,7 +191,6 @@ const Payments: React.FC<PaymentEventProps> = ({
             <h3 className="">Set Vyber Coin Price (₦):</h3>
             <input
               type="text"
-              value={inputCoinPrice}
               onChange={(e) => setInputCoinPrice(Number(e.target.value))}
               className="mt-2 p-2 border border-gray-300 rounded-md outline-none"
               required
