@@ -31,6 +31,7 @@ const Payments: React.FC<PaymentEventProps> = ({
   const [totalPage, setTotalPage] = useState<number | null>();
   const [inputCoinPrice, setInputCoinPrice] = useState<number | null>();
   const [price, setPrice] = useState<number>();
+  const [txId, setTxId] = useState<string>("");
   const [pagination, setPagination] = useState(1);
   const token = cookie.getCookie("token");
   const [messageApi, contextHolder] = message.useMessage();
@@ -100,6 +101,25 @@ const Payments: React.FC<PaymentEventProps> = ({
     setPagination(1);
   };
 
+  const handleSearchForTx = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await adminInstance.get(`/get-transaction/${txId}`);
+      setTransactions([response.data?.payload?.transaction]);
+      messageApi.success(
+        <div className="font-[outfit]">Transaction Returned Successfully.</div>
+      );
+      setTxId("");
+    } catch (error: any) {
+      console.log(error);
+      messageApi.error(
+        <div className="font-[outfit] capitalize">
+          {error.response.data.message}
+        </div>
+      );
+    }
+  };
+
   return (
     <>
       {contextHolder}
@@ -164,15 +184,21 @@ const Payments: React.FC<PaymentEventProps> = ({
               ))}
             </ul>
             <div className="flex gap-10 items-center justify-end mt-6">
-              <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
+              <form
+                className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+                onSubmit={handleSearchForTx}
+              >
                 <label htmlFor="submit">
                   <IoMdSearch size={24} className="text-black cursor-pointer" />
                 </label>
                 <input
                   type="text"
                   placeholder="Search For Tx By TxId"
-                  className="outline-none flex-1 bg-transparent text-[#BCC1CA] text-base"
+                  className="outline-none flex-1 bg-transparent text-black text-base"
                   required
+                  name="txId"
+                  onChange={(e) => setTxId(e.target.value)}
+                  value={txId}
                 />
                 <button id="submit" className="hidden">
                   Submit
@@ -192,14 +218,15 @@ const Payments: React.FC<PaymentEventProps> = ({
             <input
               type="text"
               onChange={(e) => setInputCoinPrice(Number(e.target.value))}
-              className="mt-2 p-2 border border-gray-300 rounded-md outline-none"
+              className="mt-2 p-2 border border-gray-300 rounded-sm outline-none"
               required
+              placeholder="Set Vybescoin Price"
             />
             <button
               onClick={updateCoinPrice}
               className="ml-4 p-2 bg-purple-600 text-white rounded-md"
             >
-              Update Coin Price
+              Set Coin Price
             </button>
           </div>
           <div className="my-6">
