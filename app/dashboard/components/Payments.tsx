@@ -217,10 +217,24 @@ const Payments: React.FC<PaymentEventProps> = ({
             <h3 className="">Set Vyber Coin Price (₦):</h3>
             <input
               type="text"
-              onChange={(e) => setInputCoinPrice(Number(e.target.value))}
+              onKeyPress={(e) => {
+                if (
+                  !/[0-9.]/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "Tab"
+                ) {
+                  e.preventDefault();
+                }
+              }}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                  setInputCoinPrice(value === "" ? null : Number(value));
+                }
+              }}
               className="mt-2 p-2 border border-gray-300 rounded-sm outline-none"
               required
-              placeholder="Set Vybescoin Price"
+              placeholder="Set Vyber Coin Price"
             />
             <button
               onClick={updateCoinPrice}
