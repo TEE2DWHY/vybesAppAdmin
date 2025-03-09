@@ -9,6 +9,7 @@ import { cookie } from "@/utils/storage";
 import Image from "next/image";
 import { Empty } from "antd";
 import { deleteItem } from "@/utils/triggerAdminRequest";
+import { message } from "antd";
 
 interface EventsProps {
   addEvent: () => void;
@@ -39,6 +40,8 @@ const Events: React.FC<EventsProps> = ({
   const [eventData, setEventData] = useState<Event[] | null>(null);
   const [totalPage, setTotalPage] = useState<number | null>(null);
   const [pageNumbers, setPageNumbers] = useState<number[]>([]);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [eventName, setEventName] = useState<string>("");
 
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
@@ -105,8 +108,28 @@ const Events: React.FC<EventsProps> = ({
     }
   };
 
+  const handleSearchForEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await adminInstance.get(`/get-event/${eventName}`);
+      setEventData([response.data?.payload?.event]);
+      messageApi.success(
+        <div className="font-[outfit]">Transaction Returned Successfully.</div>
+      );
+      setEventName("");
+    } catch (error: any) {
+      console.log(error);
+      messageApi.error(
+        <div className="font-[outfit] capitalize">
+          {error.response.data.message}
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="w-[84%] px-4 py-3 h-screen overflow-y-scroll">
+      {contextHolder}
       <div className="border border-gray-300 py-6 px-8 rounded-xl">
         <div className="border-b border-gray-100 pb-2 flex justify-between">
           <h1 className="text-3xl font-bold">Events</h1>
@@ -118,7 +141,6 @@ const Events: React.FC<EventsProps> = ({
           </button>
         </div>
 
-        {/* Filters and search form */}
         <div className="flex justify-between items-center pt-6 border-t border-gray-300">
           <ul className="flex gap-10 text-base">
             {["All", "Birthday Parties", "No-Cup Parties"].map((type) => (
@@ -137,15 +159,21 @@ const Events: React.FC<EventsProps> = ({
           </ul>
 
           <div className="flex gap-10 items-center">
-            <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
+            <form
+              className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+              onSubmit={handleSearchForEvent}
+            >
               <label htmlFor="submit">
                 <IoMdSearch size={24} className="text-black cursor-pointer" />
               </label>
               <input
                 type="text"
                 placeholder="Search For Event By Event Name"
-                className="outline-none flex-1 bg-transparent text-[#BCC1CA] w-[170px] text-sm"
+                className="outline-none flex-1 bg-transparent text-black w-[170px] text-sm"
                 required
+                name="eventName"
+                onChange={(e) => setEventName(e.target.value)}
+                value={eventName}
               />
               <button id="submit" className="hidden">
                 Submit
