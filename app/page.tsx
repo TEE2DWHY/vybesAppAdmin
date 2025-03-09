@@ -70,6 +70,15 @@ const Page: React.FC = () => {
           priority
         />
         <div className="flex flex-col items-center justify-center h-screen capitalize text-2xl">
+          <Image
+            src="/images/lock.gif"
+            alt="lock-img"
+            width={60}
+            height={60}
+            className="absolute bottom-10 right-5"
+            priority
+            unoptimized
+          />
           <h1 className="font-semibold mb-4 text-3xl uppercase text-center">
             Admin Dashboard.
           </h1>
