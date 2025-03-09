@@ -13,6 +13,7 @@ import { Empty } from "antd";
 import Image from "next/image";
 import { User } from "@/types";
 import { cookie } from "@/utils/storage";
+import { message } from "antd";
 
 interface UserProps {
   filterModal: () => void;
@@ -37,6 +38,8 @@ const Users: React.FC<UserProps> = ({
   const [pageNumbers, setPageNumbers] = useState<number[]>([]);
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [userName, setUserName] = useState("");
 
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
@@ -98,8 +101,30 @@ const Users: React.FC<UserProps> = ({
     (user: User) => user?.accountType === "baddie"
   );
 
+  const handleSearchForUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await adminInstance.get(`/get-user/${userName}`);
+      setFilteredUser([response.data?.payload?.user]);
+      messageApi.success(
+        <div className="font-[outfit]">Transaction Returned Successfully.</div>
+      );
+      console.log(response);
+      setUserName("");
+    } catch (error: any) {
+      console.log(error);
+      messageApi.error(
+        <div className="font-[outfit] capitalize">
+          {error.response.data.message}
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
+      {contextHolder}
+
       <div className="border border-gray-300 py-4 px-8 rounded-xl">
         <div>
           <h1 className="text-3xl border-b border-gray-200 pb-2 font-bold">
@@ -179,15 +204,20 @@ const Users: React.FC<UserProps> = ({
             </li>
           </ul>
           <div className="flex gap-10 items-center">
-            <form className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]">
+            <form
+              className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+              onSubmit={handleSearchForUser}
+            >
               <label htmlFor="submit">
                 <IoMdSearch size={24} className="text-black cursor-pointer" />
               </label>
               <input
                 type="text"
                 placeholder="Search For User By UserName"
-                className="outline-none flex-1 bg-transparent text-[#BCC1CA] text-base"
+                className="outline-none flex-1 bg-transparent text-black text-base"
                 required
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
               />
               <button id="submit" className="hidden">
                 Submit
