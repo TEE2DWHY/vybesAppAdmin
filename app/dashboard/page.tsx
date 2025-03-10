@@ -9,6 +9,7 @@ import AuthWrapper from "@/utils/AuthWrapper";
 import { User, Transaction } from "@/types";
 import AddEvent from "./components/modals/AddEvent";
 import FilterTx from "./components/modals/FilterTx";
+import DeleteModal from "./components/modals/DeleteModal";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("users");
@@ -18,6 +19,7 @@ export default function Page() {
   const [refetchEvents, setRefetchEvents] = useState(false);
   const [showFilterTxModal, setShowFilterTxModal] = useState(false);
   const [filteredTx, setFilteredTx] = useState<Transaction[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   return (
     <AuthWrapper>
@@ -44,12 +46,19 @@ export default function Page() {
         />
       )}
       <div className="flex">
+        {showDeleteModal && (
+          <DeleteModal
+            componentName="user"
+            hideDeleteModal={() => setShowDeleteModal(false)}
+          />
+        )}
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
         {activeTab === "users" && (
           <Users
             filterModal={() => setShowFilterUsersModal(true)}
             filteredUser={filteredUsers}
             setFilteredUser={setFilteredUsers}
+            showDeleteModal={() => setShowDeleteModal(true)}
           />
         )}
         {activeTab === "events" && (

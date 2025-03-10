@@ -4,6 +4,7 @@
 
 body {
   font-family: "Outfit";
+  margin: 0;
 }
 button {
   cursor: pointer;

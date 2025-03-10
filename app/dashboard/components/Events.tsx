@@ -245,13 +245,17 @@ const Events: React.FC<EventsProps> = ({
                     </span>
                     {selectedEventIndex === index && (
                       <ul
-                        className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                        className="flex flex-col gap-2 absolute bg-white-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <li className="cursor-pointer">View Details</li>
-                        <li className="cursor-pointer">Edit Details</li>
+                        <li className="cursor-pointer text-black">
+                          View Details
+                        </li>
+                        <li className="cursor-pointer text-black">
+                          Edit Details
+                        </li>
                         <li
-                          className="cursor-pointer"
+                          className="cursor-pointer text-red-500"
                           onClick={() => handleDeleteEvent(event._id)}
                         >
                           Delete Event

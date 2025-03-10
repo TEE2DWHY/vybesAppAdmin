@@ -14,17 +14,20 @@ import Image from "next/image";
 import { User } from "@/types";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
+import DeleteModal from "./modals/DeleteModal";
 
 interface UserProps {
   filterModal: () => void;
   filteredUser: User[];
   setFilteredUser: React.Dispatch<React.SetStateAction<User[]>>;
+  showDeleteModal: () => void;
 }
 
 const Users: React.FC<UserProps> = ({
   filterModal,
   filteredUser,
   setFilteredUser,
+  showDeleteModal,
 }) => {
   const [accountType, setAccountType] = useState<string>("All");
   const [pagination, setPagination] = useState<number | null>(1);
@@ -124,7 +127,6 @@ const Users: React.FC<UserProps> = ({
   return (
     <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
       {contextHolder}
-
       <div className="border border-gray-300 py-4 px-8 rounded-xl">
         <div>
           <h1 className="text-3xl border-b border-gray-200 pb-2 font-bold">
@@ -300,12 +302,24 @@ const Users: React.FC<UserProps> = ({
                     </span>
                     {selectedUserIndex === index && (
                       <ul
-                        className="flex flex-col gap-2 absolute bg-gray-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                        className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <li className="cursor-pointer">View Details</li>
-                        <li className="cursor-pointer">Edit Details</li>
-                        <li className="cursor-pointer">Delete User</li>
+                        <li className="cursor-pointer text-black">
+                          View Details
+                        </li>
+                        <li className="cursor-pointer text-black">
+                          Edit Details
+                        </li>
+                        <li
+                          className="cursor-pointer text-red-500"
+                          onClick={() => {
+                            setSelectedUserIndex(null);
+                            showDeleteModal();
+                          }}
+                        >
+                          Delete User
+                        </li>
                       </ul>
                     )}
                   </td>
