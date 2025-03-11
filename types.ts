@@ -32,6 +32,23 @@ export interface User {
   cards: any[];
 }
 
+export interface Event {
+  _id: string;
+  eventType: string;
+  name: string;
+  location: string;
+  description: string;
+  ticketPurchased: number;
+  dj: string[];
+  image: string;
+  tickets: Array<{
+    type: string;
+    price: number;
+    available: number;
+    _id: string;
+  }>;
+}
+
 export interface Transaction {
   _id: string;
   sender: string;

@@ -22,7 +22,7 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
   return (
     <>
       <div className="fixed z-50 w-full h-full bg-[#1b1b1b62] flex items-center justify-center">
-        <div className="bg-white w-[40%] sm:w-[32%] flex flex-col rounded-2xl px-6 py-6 shadow-lg relative">
+        <div className="bg-white w-[40%] sm:w-[35%] flex flex-col rounded-2xl px-6 py-6 shadow-lg relative">
           <div className="flex items-center justify-between w-full border-b border-gray-400 pb-2">
             <h2 className="font-medium text-xl text-gray-800">User Details</h2>
             <MdOutlineCancel
@@ -34,7 +34,7 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
 
           <div className="flex justify-between w-full mt-6">
             <div className="flex gap-4 items-center">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden border border-purple-800">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300">
                 <Image
                   src={user.image}
                   alt="user-img"
@@ -107,18 +107,18 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
             <div className="flex justify-between w-full  text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-600">Height:</span>
-                <span>{user.height} cm</span>
+                <span>{user.height}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-600">Weight:</span>
-                <span>{user.weight} kg</span>
+                <span>{user.weight}</span>
               </div>
             </div>
 
             <div className="flex justify-between w-full">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <FaCoins size={16} className="text-green-500" />
-                <span>Wallet Balance: ${user.walletBalance}</span>
+                <span>Wallet Balance: ₦{user.walletBalance}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <FaCoins size={16} className="text-purple-500" />

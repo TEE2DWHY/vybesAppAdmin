@@ -5,13 +5,13 @@ import { MdOutlineCancel } from "react-icons/md";
 interface DeleteModalProps {
   componentName: string;
   hideDeleteModal: () => void;
-  deleteModal: () => void;
+  deleteFn: () => void;
 }
 
 const DeleteModal: React.FC<DeleteModalProps> = ({
   componentName,
   hideDeleteModal,
-  deleteModal,
+  deleteFn,
 }) => {
   return (
     <>
@@ -38,7 +38,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
             </button>
             <button
               className="border-none bg-[#C03744] py-3 px-10 rounded-lg text-white font-medium"
-              onClick={deleteModal}
+              onClick={deleteFn}
             >
               Yes, Delete
             </button>

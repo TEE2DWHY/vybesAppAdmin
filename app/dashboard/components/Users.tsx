@@ -303,9 +303,13 @@ const Users: React.FC<UserProps> = ({
                   <td className="pl-4 py-3">{user.walletBalance}</td>
                   <td className="pl-4 py-3">
                     {user.active ? (
-                      <span className="text-green-500">Active</span>
+                      <span className="border-none rounded-2xl text-white py-1 px-3 bg-green-500 cursor-pointer">
+                        Active
+                      </span>
                     ) : (
-                      <span className="text-red-500">Inactive</span>
+                      <span className="border-none rounded-2xl bg-red-500 text-white py-1 px-3 cursor-pointer">
+                        Inactive
+                      </span>
                     )}
                   </td>
                   <td className="relative">

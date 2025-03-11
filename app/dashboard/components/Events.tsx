@@ -10,26 +10,22 @@ import Image from "next/image";
 import { Empty } from "antd";
 import { deleteItem } from "@/utils/triggerAdminRequest";
 import { message } from "antd";
+import { Event } from "@/types";
 
 interface EventsProps {
   addEvent: () => void;
   setRefetchEvent: React.Dispatch<React.SetStateAction<boolean>>;
   refetchEvents: boolean;
-}
-
-interface Event {
-  _id: string;
-  eventType: string;
-  name: string;
-  location: string;
-  description: string;
-  ticketPurchased: number;
+  showDeleteModal: (eventId: string) => void;
+  setShowEventModal: (event: Event) => void;
 }
 
 const Events: React.FC<EventsProps> = ({
   addEvent,
   refetchEvents,
   setRefetchEvent,
+  showDeleteModal,
+  setShowEventModal,
 }) => {
   const [eventType, setEventType] = useState("All");
   const [pagination, setPagination] = useState(1);
@@ -93,19 +89,6 @@ const Events: React.FC<EventsProps> = ({
     const words = description.split(" ");
     const firstFiveWords = words.slice(0, 5);
     return `${firstFiveWords.join(" ")}....`;
-  };
-
-  const handleDeleteEvent = async (eventId: string) => {
-    try {
-      await deleteItem("/delete-event", eventId);
-      setRefetchEvent(true);
-
-      if (eventData && eventData.length === 1 && pagination > 1) {
-        setPagination((prev) => prev - 1);
-      }
-    } catch (error) {
-      console.error("Error deleting event:", error);
-    }
   };
 
   const handleSearchForEvent = async (e: React.FormEvent) => {
@@ -245,10 +228,16 @@ const Events: React.FC<EventsProps> = ({
                     </span>
                     {selectedEventIndex === index && (
                       <ul
-                        className="flex flex-col gap-2 absolute bg-white-200 rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                        className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-50 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <li className="cursor-pointer text-black">
+                        <li
+                          className="cursor-pointer text-black"
+                          onClick={() => {
+                            setSelectedEventIndex(null);
+                            setShowEventModal(event);
+                          }}
+                        >
                           View Details
                         </li>
                         <li className="cursor-pointer text-black">
@@ -256,7 +245,10 @@ const Events: React.FC<EventsProps> = ({
                         </li>
                         <li
                           className="cursor-pointer text-red-500"
-                          onClick={() => handleDeleteEvent(event._id)}
+                          onClick={() => {
+                            setSelectedEventIndex(null);
+                            showDeleteModal(event._id);
+                          }}
                         >
                           Delete Event
                         </li>

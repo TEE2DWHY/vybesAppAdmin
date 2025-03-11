@@ -6,13 +6,14 @@ import Events from "./components/Events";
 import Payments from "./components/Payments";
 import FilterUsers from "./components/modals/FilterUsers";
 import AuthWrapper from "@/utils/AuthWrapper";
-import { User, Transaction } from "@/types";
+import { User, Transaction, Event } from "@/types";
 import AddEvent from "./components/modals/AddEvent";
 import FilterTx from "./components/modals/FilterTx";
 import DeleteModal from "./components/modals/DeleteModal";
 import { deleteItem } from "@/utils/triggerAdminRequest";
 import { message } from "antd";
 import UserModal from "./components/modals/UserModal";
+import EventModal from "./components/modals/EventModal";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
@@ -22,17 +23,27 @@ const Page = () => {
   const [refetchEvents, setRefetchEvents] = useState(false);
   const [showFilterTxModal, setShowFilterTxModal] = useState(false);
   const [filteredTx, setFilteredTx] = useState<Transaction[]>([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModalUser, setShowDeleteModalUser] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showDeleteModalEvent, setShowDeleteModalEvent] = useState(false);
   const [user, setUser] = useState<User>();
   const [userId, setUserId] = useState("");
+  const [eventId, setEventId] = useState("");
+  const [event, setEvent] = useState<Event>();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const handleDelete = async () => {
+  const handleDelete = async (
+    endpoint: string,
+    userId: string,
+    componentName: string
+  ) => {
     try {
-      await deleteItem("/delete-user", userId);
+      await deleteItem(endpoint, userId);
       messageApi.success(
-        <div className="font-[outfit]">User Deleted Successfully.</div>
+        <div className="font-[outfit]">
+          {componentName} Deleted Successfully.
+        </div>
       );
     } catch (error) {
       console.log(error);
@@ -41,7 +52,7 @@ const Page = () => {
 
   const showDeleteModalHandler = (id: string) => {
     setUserId(id);
-    setShowDeleteModal(true);
+    setShowDeleteModalUser(true);
   };
 
   const handleShowUserModal = (user: User) => {
@@ -49,11 +60,23 @@ const Page = () => {
     setShowUserModal(true);
   };
 
+  const handleShowEventModal = (event: Event) => {
+    console.log(event);
+    setEvent(event);
+    setShowEventModal(true);
+  };
+
   return (
     <AuthWrapper>
       {contextHolder}
       {showUserModal && user && (
         <UserModal hideUserModal={() => setShowUserModal(false)} user={user} />
+      )}
+      {showEventModal && event && (
+        <EventModal
+          hideEventModal={() => setShowEventModal(false)}
+          event={event}
+        />
       )}
       {showFilterEventModal && (
         <AddEvent
@@ -78,11 +101,18 @@ const Page = () => {
         />
       )}
       <div className="flex">
-        {showDeleteModal && (
+        {showDeleteModalEvent && (
+          <DeleteModal
+            componentName="event"
+            hideDeleteModal={() => setShowDeleteModalEvent(false)}
+            deleteFn={() => handleDelete("/delete-event", userId, "user")}
+          />
+        )}
+        {showDeleteModalUser && (
           <DeleteModal
             componentName="user"
-            hideDeleteModal={() => setShowDeleteModal(false)}
-            deleteModal={handleDelete}
+            hideDeleteModal={() => setShowDeleteModalUser(false)}
+            deleteFn={() => handleDelete("/delete-user", eventId, "event")}
           />
         )}
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -100,6 +130,8 @@ const Page = () => {
             addEvent={() => setShowFilterEventModal(true)}
             refetchEvents={refetchEvents}
             setRefetchEvent={setRefetchEvents}
+            showDeleteModal={() => setShowDeleteModalEvent(true)}
+            setShowEventModal={handleShowEventModal}
           />
         )}
         {activeTab === "payments" && (
