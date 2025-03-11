@@ -8,9 +8,9 @@ import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import Image from "next/image";
 import { Empty } from "antd";
-import { deleteItem } from "@/utils/triggerAdminRequest";
 import { message } from "antd";
 import { Event } from "@/types";
+import { FiRefreshCw } from "react-icons/fi";
 
 interface EventsProps {
   addEvent: () => void;
@@ -72,6 +72,7 @@ const Events: React.FC<EventsProps> = ({
 
   useEffect(() => {
     if (refetchEvents) {
+      setIsLoading(true);
       fetchAllEevents();
     }
   }, [refetchEvents]);
@@ -142,6 +143,12 @@ const Events: React.FC<EventsProps> = ({
           </ul>
 
           <div className="flex gap-10 items-center">
+            <span
+              className="flex gap-2 items-center text-gray-700 cursor-pointer"
+              onClick={() => setRefetchEvent(true)}
+            >
+              Refresh Events <FiRefreshCw />
+            </span>
             <form
               className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
               onSubmit={handleSearchForEvent}

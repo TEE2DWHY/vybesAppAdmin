@@ -70,7 +70,7 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
                 <div key={index} className="mb-2 p-3 bg-gray-100 rounded-md">
                   <p className="text-sm font-medium flex items-center">
                     <FaTicketAlt className="mr-2 text-green-500" />
-                    {ticket.type}: ${ticket.price}
+                    {ticket.type}: ₦{ticket.price}
                   </p>
                   <p className="text-xs text-gray-500">
                     {ticket.available} tickets available

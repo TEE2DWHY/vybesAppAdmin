@@ -36,23 +36,31 @@ const Page = () => {
   const handleDelete = async (
     endpoint: string,
     userId: string,
-    componentName: string
+    componentName: string,
+    fn: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
     try {
       await deleteItem(endpoint, userId);
       messageApi.success(
-        <div className="font-[outfit]">
+        <div className="font-[outfit] capitalize">
           {componentName} Deleted Successfully.
         </div>
       );
     } catch (error) {
       console.log(error);
+    } finally {
+      fn(false);
     }
   };
 
   const showDeleteModalHandler = (id: string) => {
     setUserId(id);
     setShowDeleteModalUser(true);
+  };
+
+  const showDeleteEventHandler = (id: string) => {
+    setEventId(id);
+    setShowDeleteModalEvent(true);
   };
 
   const handleShowUserModal = (user: User) => {
@@ -105,14 +113,28 @@ const Page = () => {
           <DeleteModal
             componentName="event"
             hideDeleteModal={() => setShowDeleteModalEvent(false)}
-            deleteFn={() => handleDelete("/delete-event", userId, "user")}
+            deleteFn={() =>
+              handleDelete(
+                "/delete-event",
+                eventId,
+                "event",
+                setShowDeleteModalEvent
+              )
+            }
           />
         )}
         {showDeleteModalUser && (
           <DeleteModal
             componentName="user"
             hideDeleteModal={() => setShowDeleteModalUser(false)}
-            deleteFn={() => handleDelete("/delete-user", eventId, "event")}
+            deleteFn={() =>
+              handleDelete(
+                "/delete-user",
+                userId,
+                "user",
+                setShowDeleteModalUser
+              )
+            }
           />
         )}
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -130,7 +152,7 @@ const Page = () => {
             addEvent={() => setShowFilterEventModal(true)}
             refetchEvents={refetchEvents}
             setRefetchEvent={setRefetchEvents}
-            showDeleteModal={() => setShowDeleteModalEvent(true)}
+            showDeleteModal={showDeleteEventHandler}
             setShowEventModal={handleShowEventModal}
           />
         )}
