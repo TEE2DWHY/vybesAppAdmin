@@ -14,13 +14,14 @@ import Image from "next/image";
 import { User } from "@/types";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
-import DeleteModal from "./modals/DeleteModal";
+import { FiRefreshCw } from "react-icons/fi";
 
 interface UserProps {
   filterModal: () => void;
   filteredUser: User[];
   setFilteredUser: React.Dispatch<React.SetStateAction<User[]>>;
-  showDeleteModal: () => void;
+  showDeleteModal: (userId: string) => void;
+  setShowUserModal: (user: User) => void;
 }
 
 const Users: React.FC<UserProps> = ({
@@ -28,6 +29,7 @@ const Users: React.FC<UserProps> = ({
   filteredUser,
   setFilteredUser,
   showDeleteModal,
+  setShowUserModal,
 }) => {
   const [accountType, setAccountType] = useState<string>("All");
   const [pagination, setPagination] = useState<number | null>(1);
@@ -43,6 +45,7 @@ const Users: React.FC<UserProps> = ({
   const adminInstance = createAdminInstance(token);
   const [messageApi, contextHolder] = message.useMessage();
   const [userName, setUserName] = useState("");
+  const [refreshUser, setRefreshUser] = useState(false);
 
   const toggleModal = (index: number | null) => {
     setSelectedUserIndex(selectedUserIndex === index ? null : index);
@@ -64,29 +67,39 @@ const Users: React.FC<UserProps> = ({
     }
   }, [totalPage]);
 
+  const refetchUser = async () => {
+    if (accountType === "Vyber" || accountType === "Baddie") {
+      setPagination(1);
+    }
+    try {
+      const resposne = await adminInstance.get("/get-users", {
+        params: {
+          page: pagination,
+          accountType: accountType,
+        },
+      });
+      setTotalPage(resposne?.data?.payload?.totalPage);
+      setUserData(resposne?.data?.payload?.allUsers);
+      setAllUsers(resposne.data?.payload?.users);
+      setFilteredUser(resposne.data?.payload?.users);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setRefreshUser(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      if (accountType === "Vyber" || accountType === "Baddie") {
-        setPagination(1);
-      }
-      try {
-        const resposne = await adminInstance.get("/get-users", {
-          params: {
-            page: pagination,
-            accountType: accountType,
-          },
-        });
-        setTotalPage(resposne?.data?.payload?.totalPage);
-        setUserData(resposne?.data?.payload?.allUsers);
-        setAllUsers(resposne.data?.payload?.users);
-        setFilteredUser(resposne.data?.payload?.users);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+    refetchUser();
   }, [pagination, accountType, setFilteredUser]);
+
+  useEffect(() => {
+    if (refreshUser) {
+      setIsLoading(true);
+      refetchUser();
+    }
+  }, [refreshUser]);
 
   const filterUser = (accountType: string) => {
     const filteredUser =
@@ -206,6 +219,12 @@ const Users: React.FC<UserProps> = ({
             </li>
           </ul>
           <div className="flex gap-10 items-center">
+            <span
+              className="flex gap-2 items-center text-gray-700 cursor-pointer"
+              onClick={() => setRefreshUser(true)}
+            >
+              Refresh Users <FiRefreshCw />
+            </span>
             <form
               className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
               onSubmit={handleSearchForUser}
@@ -305,7 +324,13 @@ const Users: React.FC<UserProps> = ({
                         className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <li className="cursor-pointer text-black">
+                        <li
+                          className="cursor-pointer text-black"
+                          onClick={() => {
+                            setSelectedUserIndex(null);
+                            setShowUserModal(user);
+                          }}
+                        >
                           View Details
                         </li>
                         <li className="cursor-pointer text-black">
@@ -315,7 +340,7 @@ const Users: React.FC<UserProps> = ({
                           className="cursor-pointer text-red-500"
                           onClick={() => {
                             setSelectedUserIndex(null);
-                            showDeleteModal();
+                            showDeleteModal(user._id);
                           }}
                         >
                           Delete User

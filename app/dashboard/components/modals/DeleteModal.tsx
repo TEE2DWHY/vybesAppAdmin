@@ -5,11 +5,13 @@ import { MdOutlineCancel } from "react-icons/md";
 interface DeleteModalProps {
   componentName: string;
   hideDeleteModal: () => void;
+  deleteModal: () => void;
 }
 
 const DeleteModal: React.FC<DeleteModalProps> = ({
   componentName,
   hideDeleteModal,
+  deleteModal,
 }) => {
   return (
     <>
@@ -24,14 +26,20 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
           <h1 className="text-2xl font-medium capitalize mt-5">
             Delete {componentName}
           </h1>
-          <p className="text-[#8C8C8C]">
+          <p className="text-[#8C8C8C] capitalize">
             Are you sure you want to delete this {componentName}?
           </p>
           <div className="flex items-center justify-between w-full mt-8">
-            <button className="border-2 border-gray-500 bg-white py-3 px-10 rounded-lg text-gray-500 font-medium">
+            <button
+              className="border-2 border-gray-500 bg-white py-3 px-10 rounded-lg text-gray-500 font-medium"
+              onClick={hideDeleteModal}
+            >
               No, Cancel
             </button>
-            <button className="border-none bg-[#C03744] py-3 px-10 rounded-lg text-white font-medium">
+            <button
+              className="border-none bg-[#C03744] py-3 px-10 rounded-lg text-white font-medium"
+              onClick={deleteModal}
+            >
               Yes, Delete
             </button>
           </div>

@@ -10,8 +10,11 @@ import { User, Transaction } from "@/types";
 import AddEvent from "./components/modals/AddEvent";
 import FilterTx from "./components/modals/FilterTx";
 import DeleteModal from "./components/modals/DeleteModal";
+import { deleteItem } from "@/utils/triggerAdminRequest";
+import { message } from "antd";
+import UserModal from "./components/modals/UserModal";
 
-export default function Page() {
+const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [showFilterUsersModal, setShowFilterUsersModal] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -20,9 +23,38 @@ export default function Page() {
   const [showFilterTxModal, setShowFilterTxModal] = useState(false);
   const [filteredTx, setFilteredTx] = useState<Transaction[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [user, setUser] = useState<User>();
+  const [userId, setUserId] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const handleDelete = async () => {
+    try {
+      await deleteItem("/delete-user", userId);
+      messageApi.success(
+        <div className="font-[outfit]">User Deleted Successfully.</div>
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const showDeleteModalHandler = (id: string) => {
+    setUserId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleShowUserModal = (user: User) => {
+    setUser(user);
+    setShowUserModal(true);
+  };
 
   return (
     <AuthWrapper>
+      {contextHolder}
+      {showUserModal && user && (
+        <UserModal hideUserModal={() => setShowUserModal(false)} user={user} />
+      )}
       {showFilterEventModal && (
         <AddEvent
           hideAddModal={() => setShowFilterEventModal(false)}
@@ -50,6 +82,7 @@ export default function Page() {
           <DeleteModal
             componentName="user"
             hideDeleteModal={() => setShowDeleteModal(false)}
+            deleteModal={handleDelete}
           />
         )}
         <SideBar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -58,7 +91,8 @@ export default function Page() {
             filterModal={() => setShowFilterUsersModal(true)}
             filteredUser={filteredUsers}
             setFilteredUser={setFilteredUsers}
-            showDeleteModal={() => setShowDeleteModal(true)}
+            showDeleteModal={showDeleteModalHandler}
+            setShowUserModal={handleShowUserModal}
           />
         )}
         {activeTab === "events" && (
@@ -79,4 +113,6 @@ export default function Page() {
       </div>
     </AuthWrapper>
   );
-}
+};
+
+export default Page;
