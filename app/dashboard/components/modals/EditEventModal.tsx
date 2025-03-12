@@ -65,16 +65,14 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     data.append("eventType", formData.eventType);
     data.append("location", formData.location);
     data.append("description", formData.description);
-    data.append("ticketPurchased", formData.ticketPurchased.toString());
+    data.append("ticketPurchased", formData.ticketPurchased?.toString());
     data.append("dj", formData.dj);
     if (imageFile) data.append("image", imageFile);
     try {
-      const response = await adminInstance.put("/edit-event", data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const response = await adminInstance.put(
+        `/edit-event/${event._id}`,
+        data
+      );
       console.log("Event updated successfully:", response);
       hideEventModal();
     } catch (error) {

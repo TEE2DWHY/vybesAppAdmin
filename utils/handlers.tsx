@@ -54,7 +54,6 @@ export const handleShowEventModal = (
   setEvent: React.Dispatch<React.SetStateAction<Event | undefined>>,
   setShowEventModal: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  console.log(event);
   setEvent(event);
   setShowEventModal(true);
 };
@@ -64,7 +63,6 @@ export const handleShowEditEventModal = (
   setEvent: React.Dispatch<React.SetStateAction<Event | undefined>>,
   setShowEditEventModal: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  console.log(event);
   setEvent(event);
   setShowEditEventModal(true);
 };
