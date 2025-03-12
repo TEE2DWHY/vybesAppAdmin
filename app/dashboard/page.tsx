@@ -19,7 +19,9 @@ import {
   showDeleteEventHandler,
   handleShowUserModal,
   handleShowEventModal,
+  handleShowEditEventModal,
 } from "../../utils/handlers";
+import EditEventModal from "./components/modals/EditEventModal";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
@@ -33,6 +35,7 @@ const Page = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showDeleteModalEvent, setShowDeleteModalEvent] = useState(false);
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [user, setUser] = useState<User>();
   const [userId, setUserId] = useState("");
   const [eventId, setEventId] = useState("");
@@ -44,6 +47,12 @@ const Page = () => {
       {contextHolder}
       {showUserModal && user && (
         <UserModal hideUserModal={() => setShowUserModal(false)} user={user} />
+      )}
+      {showEditEventModal && event && (
+        <EditEventModal
+          event={event}
+          hideEventModal={() => setShowEditEventModal(false)}
+        />
       )}
       {showEventModal && event && (
         <EventModal
@@ -129,6 +138,9 @@ const Page = () => {
             setShowEventModal={(event) =>
               handleShowEventModal(event, setEvent, setShowEventModal)
             }
+            showEditModal={(event) => {
+              handleShowEditEventModal(event, setEvent, setShowEditEventModal);
+            }}
           />
         )}
         {activeTab === "payments" && (

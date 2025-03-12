@@ -18,6 +18,7 @@ interface EventsProps {
   refetchEvents: boolean;
   showDeleteModal: (eventId: string) => void;
   setShowEventModal: (event: Event) => void;
+  showEditModal: (event: Event) => void;
 }
 
 const Events: React.FC<EventsProps> = ({
@@ -26,6 +27,7 @@ const Events: React.FC<EventsProps> = ({
   setRefetchEvent,
   showDeleteModal,
   setShowEventModal,
+  showEditModal,
 }) => {
   const [eventType, setEventType] = useState("All");
   const [pagination, setPagination] = useState(1);
@@ -247,7 +249,13 @@ const Events: React.FC<EventsProps> = ({
                         >
                           View Details
                         </li>
-                        <li className="cursor-pointer text-black">
+                        <li
+                          className="cursor-pointer text-black"
+                          onClick={() => {
+                            setSelectedEventIndex(null);
+                            showEditModal(event);
+                          }}
+                        >
                           Edit Details
                         </li>
                         <li
