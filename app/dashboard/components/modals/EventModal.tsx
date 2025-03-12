@@ -38,19 +38,16 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
               {event.description}
             </p>
 
-            {/* Location */}
             <p className="text-lg font-semibold mb-2 flex items-center">
               <FaMapMarkerAlt className="mr-2 text-xl text-blue-500" />
               {event.location}
             </p>
 
-            {/* Event Type */}
             <p className="text-md mb-2 flex items-center">
               <HiMusicNote className="mr-2 text-xl text-purple-500" />
               {event.eventType}
             </p>
 
-            {/* DJs List */}
             <div className="mb-4">
               <h3 className="font-semibold text-lg mb-2">DJs:</h3>
               <ul className="list-disc pl-5">
@@ -63,7 +60,6 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
               </ul>
             </div>
 
-            {/* Ticket Information */}
             <div className="mb-4">
               <h3 className="font-semibold text-lg mb-2">Tickets:</h3>
               {event.tickets.map((ticket, index) => (
@@ -79,7 +75,6 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
               ))}
             </div>
 
-            {/* Ticket Purchased */}
             <div className="mb-4">
               <p className="text-sm text-gray-700">
                 Tickets Purchased: {event.ticketPurchased}
