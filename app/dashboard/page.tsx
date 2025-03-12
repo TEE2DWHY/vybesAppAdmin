@@ -10,10 +10,16 @@ import { User, Transaction, Event } from "@/types";
 import AddEvent from "./components/modals/AddEvent";
 import FilterTx from "./components/modals/FilterTx";
 import DeleteModal from "./components/modals/DeleteModal";
-import { deleteItem } from "@/utils/triggerAdminRequest";
 import { message } from "antd";
 import UserModal from "./components/modals/UserModal";
 import EventModal from "./components/modals/EventModal";
+import {
+  handleDelete,
+  showDeleteModalHandler,
+  showDeleteEventHandler,
+  handleShowUserModal,
+  handleShowEventModal,
+} from "../../utils/handlers";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
@@ -32,47 +38,6 @@ const Page = () => {
   const [eventId, setEventId] = useState("");
   const [event, setEvent] = useState<Event>();
   const [messageApi, contextHolder] = message.useMessage();
-
-  const handleDelete = async (
-    endpoint: string,
-    userId: string,
-    componentName: string,
-    fn: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    try {
-      await deleteItem(endpoint, userId);
-      messageApi.success(
-        <div className="font-[outfit] capitalize">
-          {componentName} Deleted Successfully.
-        </div>
-      );
-    } catch (error) {
-      console.log(error);
-    } finally {
-      fn(false);
-    }
-  };
-
-  const showDeleteModalHandler = (id: string) => {
-    setUserId(id);
-    setShowDeleteModalUser(true);
-  };
-
-  const showDeleteEventHandler = (id: string) => {
-    setEventId(id);
-    setShowDeleteModalEvent(true);
-  };
-
-  const handleShowUserModal = (user: User) => {
-    setUser(user);
-    setShowUserModal(true);
-  };
-
-  const handleShowEventModal = (event: Event) => {
-    console.log(event);
-    setEvent(event);
-    setShowEventModal(true);
-  };
 
   return (
     <AuthWrapper>
@@ -118,7 +83,8 @@ const Page = () => {
                 "/delete-event",
                 eventId,
                 "event",
-                setShowDeleteModalEvent
+                setShowDeleteModalEvent,
+                messageApi
               )
             }
           />
@@ -132,7 +98,8 @@ const Page = () => {
                 "/delete-user",
                 userId,
                 "user",
-                setShowDeleteModalUser
+                setShowDeleteModalUser,
+                messageApi
               )
             }
           />
@@ -143,8 +110,12 @@ const Page = () => {
             filterModal={() => setShowFilterUsersModal(true)}
             filteredUser={filteredUsers}
             setFilteredUser={setFilteredUsers}
-            showDeleteModal={showDeleteModalHandler}
-            setShowUserModal={handleShowUserModal}
+            showDeleteModal={(id) =>
+              showDeleteModalHandler(id, setUserId, setShowDeleteModalUser)
+            }
+            setShowUserModal={(user) =>
+              handleShowUserModal(user, setUser, setShowUserModal)
+            }
           />
         )}
         {activeTab === "events" && (
@@ -152,8 +123,12 @@ const Page = () => {
             addEvent={() => setShowFilterEventModal(true)}
             refetchEvents={refetchEvents}
             setRefetchEvent={setRefetchEvents}
-            showDeleteModal={showDeleteEventHandler}
-            setShowEventModal={handleShowEventModal}
+            showDeleteModal={(id) =>
+              showDeleteEventHandler(id, setEventId, setShowDeleteModalEvent)
+            }
+            setShowEventModal={(event) =>
+              handleShowEventModal(event, setEvent, setShowEventModal)
+            }
           />
         )}
         {activeTab === "payments" && (
