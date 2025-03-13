@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { MdOutlineCancel } from "react-icons/md";
 import { Event } from "@/types";
@@ -5,6 +6,7 @@ import Image from "next/image";
 import { FiEdit3 } from "react-icons/fi";
 import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
+// import * as motion from "motion/react-client";
 
 interface EditEventModalProps {
   hideEventModal: () => void;
@@ -24,11 +26,33 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     ticketPurchased: event.ticketPurchased,
     dj: event.dj.join(", "),
     image: event.image,
+    tickets: {
+      regular: {
+        price:
+          event.tickets.find((ticket) => ticket.type === "Regular")?.price || 0,
+        available:
+          event.tickets.find((ticket) => ticket.type === "Regular")
+            ?.available || 0,
+      },
+      vip: {
+        price:
+          event.tickets.find((ticket) => ticket.type === "VIP")?.price || 0,
+        available:
+          event.tickets.find((ticket) => ticket.type === "VIP")?.available || 0,
+      },
+      vvip: {
+        price:
+          event.tickets.find((ticket) => ticket.type === "VVIP")?.price || 0,
+        available:
+          event.tickets.find((ticket) => ticket.type === "VVIP")?.available ||
+          0,
+      },
+    },
   });
   const [imagePreview, setImagePreview] = useState(event.image);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const token = cookie.getCookie("token");
-  const adminInstance = createAdminInstance("token");
+  const adminInstance = createAdminInstance(token);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -68,6 +92,24 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     data.append("ticketPurchased", formData.ticketPurchased?.toString());
     data.append("dj", formData.dj);
     if (imageFile) data.append("image", imageFile);
+    data.append(
+      "tickets[Regular][price]",
+      formData.tickets.regular.price.toString()
+    );
+    data.append(
+      "tickets[Regular][available]",
+      formData.tickets.regular.available.toString()
+    );
+    data.append("tickets[VIP][price]", formData.tickets.vip.price.toString());
+    data.append(
+      "tickets[VIP][available]",
+      formData.tickets.vip.available.toString()
+    );
+    data.append("tickets[VVIP][price]", formData.tickets.vvip.price.toString());
+    data.append(
+      "tickets[VVIP][available]",
+      formData.tickets.vvip.available.toString()
+    );
     try {
       const response = await adminInstance.put(
         `/edit-event/${event._id}`,
@@ -82,9 +124,49 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     }
   };
 
+  const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const ticketType = name.replace("Price", "").toLowerCase() as
+      | "regular"
+      | "vip"
+      | "vvip";
+
+    setFormData((prevData) => ({
+      ...prevData,
+      tickets: {
+        ...prevData.tickets,
+        [ticketType]: {
+          ...prevData.tickets[ticketType],
+          price: parseFloat(value),
+        },
+      },
+    }));
+  };
+
+  const handleAvailableAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    const ticketType = name.replace("Available", "").toLowerCase() as
+      | "regular"
+      | "vip"
+      | "vvip";
+
+    setFormData((prevData) => ({
+      ...prevData,
+      tickets: {
+        ...prevData.tickets,
+        [ticketType]: {
+          ...prevData.tickets[ticketType],
+          available: parseInt(value, 10),
+        },
+      },
+    }));
+  };
+
   return (
     <div className="fixed z-50 w-full h-full bg-[#1b1b1b62] flex items-center justify-center">
-      <div className="bg-white w-[90%] sm:w-[32%] flex flex-col rounded-2xl px-6 py-6 shadow-lg relative">
+      <div className="bg-white w-[90%] sm:w-[32%] flex flex-col rounded-2xl px-6 py-6 shadow-lg relative h-[755px] overflow-y-scroll">
         <div className="flex items-center justify-between w-full border-b border-gray-300 pb-2">
           <h2 className="font-semibold text-xl text-gray-800">Edit Details</h2>
           <MdOutlineCancel
@@ -226,6 +308,99 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
               onChange={handleInputChange}
               disabled={isLoading}
             />
+          </div>
+          <div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Regular Ticket
+              </label>
+              <div className="flex items-center gap-4 mb-2">
+                <div>
+                  <label>Price</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="regularPrice"
+                    value={formData.tickets.regular.price}
+                    onChange={handleTicketPriceChange}
+                    disabled={isLoading}
+                    placeholder="Price"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 ml-2">Available</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="regularAvailable"
+                    value={formData.tickets.regular.available}
+                    onChange={handleAvailableAmountChange}
+                    disabled={isLoading}
+                    placeholder="Available"
+                  />
+                </div>
+              </div>
+
+              <label className="block text-gray-700 font-medium mb-2">
+                VIP Ticket
+              </label>
+              <div className="flex items-center gap-4 mb-2">
+                <div>
+                  <label>Price</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="vipPrice"
+                    value={formData.tickets.vip.price}
+                    onChange={handleTicketPriceChange}
+                    disabled={isLoading}
+                    placeholder="Price"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 ml-2">Available</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="vvipAvailable"
+                    value={formData.tickets.vip.available}
+                    onChange={handleAvailableAmountChange}
+                    disabled={isLoading}
+                    placeholder="Available"
+                  />
+                </div>
+              </div>
+
+              <label className="block text-gray-700 font-medium mb-2">
+                VVIP Ticket
+              </label>
+              <div className="flex items-center gap-4 mt-2">
+                <div>
+                  <label>VVIP</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="vipPrice"
+                    value={formData.tickets.vvip.price}
+                    onChange={handleTicketPriceChange}
+                    disabled={isLoading}
+                    placeholder="Price"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 ml-2">Available</label>
+                  <input
+                    type="number"
+                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="vvipAvailable"
+                    value={formData.tickets.vvip.available}
+                    onChange={handleAvailableAmountChange}
+                    disabled={isLoading}
+                    placeholder="Available"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <button
