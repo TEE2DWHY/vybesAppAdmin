@@ -7,7 +7,6 @@ import Payments from "./components/Payments";
 import FilterUsers from "./components/modals/FilterUsers";
 import AuthWrapper from "@/utils/AuthWrapper";
 import { User, Transaction, Event } from "@/types";
-import AddEvent from "./components/modals/AddEvent";
 import FilterTx from "./components/modals/FilterTx";
 import DeleteModal from "./components/modals/DeleteModal";
 import { message } from "antd";
@@ -22,6 +21,7 @@ import {
   handleShowEditEventModal,
 } from "../../utils/handlers";
 import EditEventModal from "./components/modals/EditEventModal";
+import AddEvent from "./components/modals/AddEvent";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
