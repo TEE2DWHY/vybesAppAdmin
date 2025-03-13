@@ -21,7 +21,7 @@ import {
   handleShowEditEventModal,
 } from "../../utils/handlers";
 import EditEventModal from "./components/modals/EditEventModal";
-import AddEvent from "./components/modals/AddEvent";
+import AddEvent from "./components/modals/addEvent";
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState("users");
