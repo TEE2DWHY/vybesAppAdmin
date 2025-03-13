@@ -5,8 +5,9 @@ import { message } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AxiosError } from "axios";
+import { SparklesCore } from "./dashboard/components/ui/sparkles";
 
 interface FormData {
   email: string;
@@ -138,6 +139,16 @@ const Page: React.FC = () => {
               </Link>
             </p>
           </form>
+          <div className="w-[40rem] h-40 relative flex items-center justify-center">
+            <SparklesCore
+              background="transparent"
+              minSize={0.4}
+              maxSize={1}
+              particleDensity={1200}
+              className="w-full h-full self-center"
+              particleColor="#a855f7"
+            />
+          </div>
         </div>
       </div>
     </>
