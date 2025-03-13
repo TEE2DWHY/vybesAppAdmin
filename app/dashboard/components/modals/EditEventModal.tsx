@@ -11,11 +11,13 @@ import { cookie } from "@/utils/storage";
 interface EditEventModalProps {
   hideEventModal: () => void;
   event: Event;
+  setRefetchEvents: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const EditEventModal: React.FC<EditEventModalProps> = ({
   hideEventModal,
   event,
+  setRefetchEvents,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -116,6 +118,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
         data
       );
       console.log("Event updated successfully:", response);
+      setRefetchEvents(true);
       hideEventModal();
     } catch (error) {
       console.error("Error updating event:", error);

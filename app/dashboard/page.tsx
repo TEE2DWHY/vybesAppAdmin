@@ -52,6 +52,7 @@ const Page = () => {
         <EditEventModal
           event={event}
           hideEventModal={() => setShowEditEventModal(false)}
+          setRefetchEvents={setRefetchEvents}
         />
       )}
       {showEventModal && event && (
