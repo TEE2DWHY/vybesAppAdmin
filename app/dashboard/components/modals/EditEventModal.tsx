@@ -6,7 +6,6 @@ import Image from "next/image";
 import { FiEdit3 } from "react-icons/fi";
 import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
-// import * as motion from "motion/react-client";
 
 interface EditEventModalProps {
   hideEventModal: () => void;
@@ -20,37 +19,36 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   setRefetchEvents,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: event.name,
-    eventType: event.eventType || "",
-    location: event.location,
-    description: event.description,
-    ticketPurchased: event.ticketPurchased,
-    dj: event.dj.join(", "),
-    image: event.image,
-    tickets: {
-      regular: {
-        price:
-          event.tickets.find((ticket) => ticket.type === "Regular")?.price || 0,
-        available:
-          event.tickets.find((ticket) => ticket.type === "Regular")
-            ?.available || 0,
-      },
-      vip: {
-        price:
-          event.tickets.find((ticket) => ticket.type === "VIP")?.price || 0,
-        available:
-          event.tickets.find((ticket) => ticket.type === "VIP")?.available || 0,
-      },
-      vvip: {
-        price:
-          event.tickets.find((ticket) => ticket.type === "VVIP")?.price || 0,
-        available:
-          event.tickets.find((ticket) => ticket.type === "VVIP")?.available ||
-          0,
-      },
-    },
+  const [formData, setFormData] = useState(() => {
+    const ticketData = {
+      regular: { price: 0, available: 0 },
+      vip: { price: 0, available: 0 },
+      vvip: { price: 0, available: 0 },
+    };
+
+    // Map the event tickets to the formData structure
+    event.tickets.forEach((ticket) => {
+      const ticketType = ticket.type as "regular" | "vip" | "vvip"; // Convert to lowercase
+      if (ticketData[ticketType]) {
+        ticketData[ticketType] = {
+          price: ticket.price,
+          available: ticket.available,
+        };
+      }
+    });
+
+    return {
+      name: event.name,
+      eventType: event.eventType || "",
+      location: event.location,
+      description: event.description,
+      ticketPurchased: event.ticketPurchased,
+      dj: event.dj.join(", "),
+      image: event.image,
+      tickets: ticketData,
+    };
   });
+
   const [imagePreview, setImagePreview] = useState(event.image);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const token = cookie.getCookie("token");
@@ -93,25 +91,28 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     data.append("description", formData.description);
     data.append("ticketPurchased", formData.ticketPurchased?.toString());
     data.append("dj", formData.dj);
+
     if (imageFile) data.append("image", imageFile);
+
     data.append(
-      "tickets[Regular][price]",
+      "tickets[regular][price]",
       formData.tickets.regular.price.toString()
     );
     data.append(
-      "tickets[Regular][available]",
+      "tickets[regular][available]",
       formData.tickets.regular.available.toString()
     );
-    data.append("tickets[VIP][price]", formData.tickets.vip.price.toString());
+    data.append("tickets[vip][price]", formData.tickets.vip.price.toString());
     data.append(
-      "tickets[VIP][available]",
+      "tickets[vip][available]",
       formData.tickets.vip.available.toString()
     );
-    data.append("tickets[VVIP][price]", formData.tickets.vvip.price.toString());
+    data.append("tickets[vvip][price]", formData.tickets.vvip.price.toString());
     data.append(
-      "tickets[VVIP][available]",
+      "tickets[vvip][available]",
       formData.tickets.vvip.available.toString()
     );
+
     try {
       const response = await adminInstance.put(
         `/edit-event/${event._id}`,
@@ -324,7 +325,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     name="regularPrice"
-                    value={formData.tickets.regular.price}
+                    value={formData.tickets.regular.price || ""}
                     onChange={handleTicketPriceChange}
                     disabled={isLoading}
                     placeholder="Price"
@@ -336,7 +337,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     name="regularAvailable"
-                    value={formData.tickets.regular.available}
+                    value={formData.tickets.regular.available || ""}
                     onChange={handleAvailableAmountChange}
                     disabled={isLoading}
                     placeholder="Available"
@@ -354,7 +355,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     name="vipPrice"
-                    value={formData.tickets.vip.price}
+                    value={formData.tickets.vip.price || ""}
                     onChange={handleTicketPriceChange}
                     disabled={isLoading}
                     placeholder="Price"
@@ -365,8 +366,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                   <input
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    name="vvipAvailable"
-                    value={formData.tickets.vip.available}
+                    name="vipAvailable"
+                    value={formData.tickets.vip.available || ""}
                     onChange={handleAvailableAmountChange}
                     disabled={isLoading}
                     placeholder="Available"
@@ -383,8 +384,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                   <input
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    name="vipPrice"
-                    value={formData.tickets.vvip.price}
+                    name="vvipPrice"
+                    value={formData.tickets.vvip.price || ""}
                     onChange={handleTicketPriceChange}
                     disabled={isLoading}
                     placeholder="Price"
@@ -396,7 +397,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                     type="number"
                     className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     name="vvipAvailable"
-                    value={formData.tickets.vvip.available}
+                    value={formData.tickets.vvip.available || ""}
                     onChange={handleAvailableAmountChange}
                     disabled={isLoading}
                     placeholder="Available"
