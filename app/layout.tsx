@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -83,7 +84,9 @@ export default function RootLayout({
           content={String(metadata.twitter?.description ?? "")}
         />
       </head>
-      <body className={`${outfit.variable} antialiased`}>{children}</body>
+      <body className={`${outfit.variable} antialiased`}>
+        <AntdRegistry>{children}</AntdRegistry>
+      </body>
     </html>
   );
 }
