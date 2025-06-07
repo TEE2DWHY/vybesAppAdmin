@@ -125,7 +125,6 @@ const Users: React.FC<UserProps> = ({
       messageApi.success(
         <div className="font-[outfit]">Transaction Returned Successfully.</div>
       );
-      console.log(response);
       setUserName("");
     } catch (error: any) {
       console.log(error);
@@ -138,7 +137,7 @@ const Users: React.FC<UserProps> = ({
   };
 
   return (
-    <div className="w-[84%]  px-4 py-5 h-screen  overflow-y-scroll">
+    <div className="w-full md:w-[84%] px-4 py-5 h-screen overflow-y-scroll">
       {contextHolder}
       <div className="border border-gray-300 py-4 px-8 rounded-xl">
         <div>
@@ -146,38 +145,38 @@ const Users: React.FC<UserProps> = ({
             Users
           </h1>
         </div>
-        <div className="flex justify-between my-4">
-          <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
-            <PiLetterCircleVBold size={62} color="#fff" />
+        <div className="flex flex-col sm:flex-row flex-wrap justify-between gap-4 my-4">
+          <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-6 px-4 w-full sm:w-[48%] lg:w-[23%] shadow-lg flex items-center gap-4">
+            <PiLetterCircleVBold size={48} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">{numberOfVybers.length}</h1>
+              <h1 className="text-2xl text-white">{numberOfVybers.length}</h1>
               <h4 className="capitalize text-white">No of vybers</h4>
             </div>
           </div>
-          <div className="rounded-md bg-gradient-to-r from-orange-500 to-orange-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
-            <TbCircleLetterB size={62} color="#fff" />
+          <div className="rounded-md bg-gradient-to-r from-orange-500 to-orange-700 py-6 px-4 w-full sm:w-[48%] lg:w-[23%] shadow-lg flex items-center gap-4">
+            <TbCircleLetterB size={48} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">{numberOfBaddies.length}</h1>
+              <h1 className="text-2xl text-white">{numberOfBaddies.length}</h1>
               <h4 className="capitalize text-white">No of baddies</h4>
             </div>
           </div>
-          <div className="rounded-md bg-gradient-to-r from-gray-700 to-gray-500 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
-            <FaUsers size={62} color="#fff" />
+          <div className="rounded-md bg-gradient-to-r from-gray-700 to-gray-500 py-6 px-4 w-full sm:w-[48%] lg:w-[23%] shadow-lg flex items-center gap-4">
+            <FaUsers size={48} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">{userData?.length}</h1>
+              <h1 className="text-2xl text-white">{userData?.length}</h1>
               <h4 className="capitalize text-white">Total No of users</h4>
             </div>
           </div>
-          <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
-            <FaUserAlt size={62} color="#fff" />
+          <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-6 px-4 w-full sm:w-[48%] lg:w-[23%] shadow-lg flex items-center gap-4">
+            <FaUserAlt size={48} color="#fff" />
             <div>
-              <h1 className="text-3xl text-white">120</h1>
+              <h1 className="text-2xl text-white">120</h1>
               <h4 className="capitalize text-white">Active users</h4>
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-center pt-4 border-t border-gray-300">
-          <ul className="flex gap-10 text-base">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-gray-300 gap-4">
+          <ul className="flex gap-10 text-base flex-wrap">
             <li
               className={`${
                 accountType === "All"
@@ -218,7 +217,7 @@ const Users: React.FC<UserProps> = ({
               Baddie
             </li>
           </ul>
-          <div className="flex gap-10 items-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-10 items-start sm:items-center mt-4 sm:mt-0">
             <span
               className="flex gap-2 items-center text-gray-700 cursor-pointer"
               onClick={() => setRefreshUser(true)}
@@ -226,7 +225,7 @@ const Users: React.FC<UserProps> = ({
               Refresh Users <FiRefreshCw />
             </span>
             <form
-              className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+              className="flex gap-3 items-center p-2 rounded-md w-full sm:w-[280px] bg-[#F3F4F6]"
               onSubmit={handleSearchForUser}
             >
               <label htmlFor="submit">
@@ -273,128 +272,120 @@ const Users: React.FC<UserProps> = ({
             />
           </div>
         ) : (
-          <table
-            className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
-            onClick={() => setSelectedUserIndex(null)}
-          >
-            <thead className="text-left bg-purple-500 ">
-              <tr>
-                <th className="pl-4 text-white py-5">Account Type</th>
-                <th className="pl-4 text-white py-5">Full Name</th>
-                <th className="pl-4 text-white py-5">Username</th>
-                <th className="pl-4 text-white py-5">Gender</th>
-                <th className="pl-4 text-white py-5">Phone Number</th>
-                <th className="pl-4 text-white py-5">Wallet Balance</th>
-                <th className="pl-4 text-white py-5">Active</th>
-                <th className="pl-4 text-white py-5">Action</th>
-              </tr>
-            </thead>
-            <tbody className="bg-purple-50">
-              {filteredUser?.map((user, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-200 text-gray-600"
-                >
-                  <td className="pl-4 py-3 capitalize">{user.accountType}</td>
-                  <td className="pl-4 py-3 capitalize">{user.fullName}</td>
-                  <td className="pl-4 py-3 capitalize">{user.userName}</td>
-                  <td className="pl-4 py-3 capitalize">{user.gender}</td>
-                  <td className="pl-4 py-3">{user.phoneNumber}</td>
-                  <td className="pl-4 py-3">{user.walletBalance}</td>
-                  <td className="pl-4 py-3">
-                    {user.active ? (
-                      <span className="border-none rounded-2xl text-white py-1 px-3 bg-green-500 cursor-pointer">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="border-none rounded-2xl bg-red-500 text-white py-1 px-3 cursor-pointer">
-                        Inactive
-                      </span>
-                    )}
-                  </td>
-                  <td className="relative">
-                    <span className="flex items-center justify-center cursor-pointer overflow-hidden">
-                      <HiOutlineDotsHorizontal
-                        size={24}
-                        cursor={"pointer"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleModal(index);
-                        }}
-                      />
-                    </span>
-                    {selectedUserIndex === index && (
-                      <ul
-                        className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-62px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <li
-                          className="cursor-pointer text-black"
-                          onClick={() => {
-                            setSelectedUserIndex(null);
-                            setShowUserModal(user);
-                          }}
-                        >
-                          View Details
-                        </li>
-                        <li
-                          className="cursor-pointer text-red-500"
-                          onClick={() => {
-                            setSelectedUserIndex(null);
-                            showDeleteModal(user._id);
-                          }}
-                        >
-                          Delete User
-                        </li>
-                      </ul>
-                    )}
-                  </td>
+          <div className="overflow-x-auto mt-10">
+            <table
+              className="w-full min-w-[700px] rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
+              onClick={() => setSelectedUserIndex(null)}
+            >
+              <thead className="text-left bg-purple-500 ">
+                <tr>
+                  <th className="pl-4 text-white py-5">Account Type</th>
+                  <th className="pl-4 text-white py-5">Full Name</th>
+                  <th className="pl-4 text-white py-5">Username</th>
+                  <th className="pl-4 text-white py-5">Gender</th>
+                  <th className="pl-4 text-white py-5">Phone Number</th>
+                  <th className="pl-4 text-white py-5">Wallet Balance</th>
+                  <th className="pl-4 text-white py-5">Active</th>
+                  <th className="pl-4 text-white py-5">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-purple-50">
+                {filteredUser?.map((user, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-200 text-gray-600"
+                  >
+                    <td className="pl-4 py-3 capitalize">{user.accountType}</td>
+                    <td className="pl-4 py-3 capitalize">{user.fullName}</td>
+                    <td className="pl-4 py-3 capitalize">{user.userName}</td>
+                    <td className="pl-4 py-3 capitalize">{user.gender}</td>
+                    <td className="pl-4 py-3">{user.phoneNumber}</td>
+                    <td className="pl-4 py-3">{user.walletBalance}</td>
+                    <td className="pl-4 py-3">
+                      {user.active ? (
+                        <span className="border-none rounded-2xl text-white py-1 px-3 bg-green-500 cursor-pointer">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="border-none rounded-2xl bg-red-500 text-white py-1 px-3 cursor-pointer">
+                          Inactive
+                        </span>
+                      )}
+                    </td>
+                    <td className="relative">
+                      <span className="flex items-center justify-center cursor-pointer overflow-hidden">
+                        <HiOutlineDotsHorizontal
+                          size={24}
+                          cursor={"pointer"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleModal(index);
+                          }}
+                        />
+                      </span>
+                      {selectedUserIndex === index && (
+                        <ul
+                          className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-62px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-30 shadow-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <li
+                            className="cursor-pointer text-black"
+                            onClick={() => {
+                              setSelectedUserIndex(null);
+                              setShowUserModal(user);
+                            }}
+                          >
+                            View Details
+                          </li>
+                          <li
+                            className="cursor-pointer text-red-500"
+                            onClick={() => showDeleteModal(user._id)}
+                          >
+                            Delete User
+                          </li>
+                        </ul>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-        {isLoading ||
-          (filteredUser.length !== 0 && (
-            <ul className="flex justify-center items-center gap-6">
-              <FaAngleLeft
-                size={16}
-                color="#1b1b1b"
-                cursor={"pointer"}
-                onClick={() =>
-                  setPagination((prev) =>
-                    prev === null || prev <= 1 ? totalPage : prev - 1
-                  )
-                }
-              />
-              {pageNumbers.map((pageNumber, index) => (
-                <li
-                  key={index}
-                  className={`${
-                    pagination === pageNumber ? "bg-purple-500" : "bg-gray-500"
-                  } rounded-md text-white px-3 py-1 cursor-pointer`}
-                  onClick={() => setPagination(pageNumber)}
-                >
-                  {pageNumber}
-                </li>
-              ))}
-
-              <FaChevronRight
-                size={16}
-                onClick={() =>
-                  setPagination((prev) =>
-                    prev === null || (totalPage !== null && prev >= totalPage)
-                      ? 1
-                      : prev + 1
-                  )
-                }
-                className={`${
-                  pagination === totalPage ? "text-gray-400" : "#1b1b1b"
+        <div className="mt-6 flex justify-center">
+          <ul className="flex flex-wrap justify-center items-center gap-4">
+            <li
+              className="cursor-pointer rounded-sm border border-gray-300 flex justify-center items-center w-10 h-10 hover:border-purple-500"
+              onClick={() =>
+                pagination && pagination > 1 && setPagination(pagination - 1)
+              }
+            >
+              <FaAngleLeft />
+            </li>
+            {pageNumbers?.map((number) => (
+              <li
+                key={number}
+                className={`cursor-pointer rounded-sm border border-gray-300 flex justify-center items-center w-10 h-10 hover:border-purple-500 ${
+                  pagination === number && "bg-purple-500 text-white"
                 }`}
-                cursor={"pointer"}
-              />
-            </ul>
-          ))}
+                onClick={() => setPagination(number)}
+              >
+                {number}
+              </li>
+            ))}
+            <li
+              className="cursor-pointer rounded-sm border border-gray-300 flex justify-center items-center w-10 h-10 hover:border-purple-500"
+              onClick={() =>
+                pagination &&
+                totalPage &&
+                pagination < totalPage &&
+                setPagination(pagination + 1)
+              }
+            >
+              <FaChevronRight />
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

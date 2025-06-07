@@ -11,26 +11,30 @@ interface EventModalProps {
 
 const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
   return (
-    <>
-      <div className="fixed z-50 w-full h-full bg-[#1b1b1b62] flex items-center justify-center transition-all ease-out duration-300 opacity-100">
-        <div className="bg-white w-[90%] sm:w-[50%] md:w-[40%] lg:w-[35%] xl:w-[40%] flex flex-col sm:flex-row rounded-2xl px-6 py-6 shadow-lg relative transform transition-all ease-in-out duration-300 scale-95 hover:scale-100 overflow-auto">
-          <div className="absolute top-2 right-2 mb-10">
-            <MdOutlineCancel
-              size={34}
-              onClick={hideEventModal}
-              className=" text-black rounded-full p-2 cursor-pointer"
-            />
-          </div>
+    <div className="fixed z-50 inset-0 bg-[#1b1b1b62] flex items-center justify-center px-4">
+      <div className="bg-white w-full max-w-[95%] sm:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%] max-h-screen overflow-y-auto rounded-2xl shadow-lg p-6 relative transition-all ease-in-out duration-300">
+        {/* Close Button */}
+        <div className="absolute top-4 right-4">
+          <MdOutlineCancel
+            size={30}
+            onClick={hideEventModal}
+            className="text-black bg-gray-200 hover:bg-gray-300 rounded-full p-1 cursor-pointer transition"
+          />
+        </div>
 
-          <div className="w-full sm:w-2/3 mb-4 sm:mb-0">
+        {/* Modal Content */}
+        <div className="flex flex-col sm:flex-row gap-6">
+          {/* Event Image */}
+          <div className="w-full sm:w-1/2">
             <img
               src={event.image}
               alt={event.name}
-              className="w-full h-64 object-cover rounded-lg mb-4"
+              className="w-full h-64 object-cover rounded-lg"
             />
           </div>
 
-          <div className="flex flex-col sm:w-2/3 sm:pl-4">
+          {/* Event Details */}
+          <div className="w-full sm:w-1/2 flex flex-col">
             <h2 className="text-2xl font-semibold text-gray-800 mb-3 capitalize">
               {event.name}
             </h2>
@@ -38,12 +42,12 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
               {event.description}
             </p>
 
-            <p className="text-lg font-semibold mb-2 flex items-center">
+            <p className="text-base font-medium mb-2 flex items-center">
               <FaMapMarkerAlt className="mr-2 text-xl text-blue-500" />
               {event.location}
             </p>
 
-            <p className="text-md mb-2 flex items-center">
+            <p className="text-base mb-2 flex items-center">
               <HiMusicNote className="mr-2 text-xl text-purple-500" />
               {event.eventType}
             </p>
@@ -75,7 +79,7 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
               ))}
             </div>
 
-            <div className="mb-4">
+            <div>
               <p className="text-sm text-gray-700">
                 Tickets Purchased: {event.ticketPurchased}
               </p>
@@ -83,7 +87,7 @@ const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

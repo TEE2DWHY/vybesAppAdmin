@@ -114,21 +114,22 @@ const Events: React.FC<EventsProps> = ({
   };
 
   return (
-    <div className="w-[84%] px-4 py-3 h-screen overflow-y-scroll">
+    <div className="w-full md:w-[84%] px-2 md:px-4 py-3 h-screen overflow-y-scroll">
       {contextHolder}
-      <div className="border border-gray-300 py-6 px-8 rounded-xl">
-        <div className="border-b border-gray-100 pb-2 flex justify-between">
-          <h1 className="text-3xl font-bold">Events</h1>
+      <div className="border border-gray-300 py-4 md:py-6 px-4 md:px-8 rounded-xl">
+        <div className="border-b border-gray-100 pb-2 flex flex-col md:flex-row justify-between gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold">Events</h1>
           <button
-            className="bg-purple-600 text-white px-4 py-3 flex items-center gap-2 font-bold text-sm rounded-lg"
+            className="bg-purple-600 text-white px-4 py-2 md:py-3 flex items-center justify-center gap-2 font-bold text-sm rounded-lg"
             onClick={addEvent}
           >
             Add Event <FaPlus size={14} />
           </button>
         </div>
 
-        <div className="flex justify-between items-center pt-6 border-t border-gray-300">
-          <ul className="flex gap-10 text-base">
+        {/* 🔁 Filter and Search Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-6 border-t border-gray-300 gap-4">
+          <ul className="flex gap-4 md:gap-10 text-base overflow-x-auto">
             {["All", "Birthday Parties", "No-Cup Parties"].map((type) => (
               <li
                 key={type}
@@ -136,7 +137,7 @@ const Events: React.FC<EventsProps> = ({
                   eventType === type
                     ? "text-purple-500 font-bold"
                     : "text-[#BFBFBF]"
-                } cursor-pointer`}
+                } cursor-pointer whitespace-nowrap`}
                 onClick={() => setEventType(type)}
               >
                 {type}
@@ -144,7 +145,7 @@ const Events: React.FC<EventsProps> = ({
             ))}
           </ul>
 
-          <div className="flex gap-10 items-center">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             <span
               className="flex gap-2 items-center text-gray-700 cursor-pointer"
               onClick={() => setRefetchEvent(true)}
@@ -152,7 +153,7 @@ const Events: React.FC<EventsProps> = ({
               Refresh Events <FiRefreshCw />
             </span>
             <form
-              className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+              className="flex gap-2 items-center p-2 rounded-md w-full sm:w-[280px] bg-[#F3F4F6]"
               onSubmit={handleSearchForEvent}
             >
               <label htmlFor="submit">
@@ -161,7 +162,7 @@ const Events: React.FC<EventsProps> = ({
               <input
                 type="text"
                 placeholder="Search For Event By Event Name"
-                className="outline-none flex-1 bg-transparent text-black w-[170px] text-sm"
+                className="outline-none flex-1 bg-transparent text-black text-sm"
                 required
                 name="eventName"
                 onChange={(e) => setEventName(e.target.value)}
@@ -174,6 +175,7 @@ const Events: React.FC<EventsProps> = ({
           </div>
         </div>
 
+        {/* 🔁 Loading or Empty */}
         {isLoading ? (
           <div className="h-[50vh] flex flex-col items-center justify-center text-base font-medium">
             <Image
@@ -193,92 +195,95 @@ const Events: React.FC<EventsProps> = ({
             />
           </div>
         ) : (
-          <table
-            className="my-10 w-full rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
-            onClick={() => setSelectedEventIndex(null)}
-          >
-            <thead className="text-left bg-purple-500 ">
-              <tr>
-                {[
-                  "Event Type",
-                  "Event Name",
-                  "Location",
-                  "Description",
-                  "Action",
-                ].map((title, index) => (
-                  <th key={index} className="pl-4 text-white py-5">
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-purple-50">
-              {filteredEvents?.map((event, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-200 text-gray-600"
-                >
-                  <td className="pl-4 py-3">{event.eventType}</td>
-                  <td className="pl-4 py-3 capitalize">{event.name}</td>
-                  <td className="pl-4 py-3">{event.location}</td>
-                  <td className="pl-4 py-3 capitalize">
-                    {getFirstFiveWords(event.description)}
-                  </td>
-                  <td className="relative">
-                    <span className="flex items-center justify-center cursor-pointer overflow-hidden">
-                      <HiOutlineDotsHorizontal
-                        size={24}
-                        cursor={"pointer"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleModal(index);
-                        }}
-                      />
-                    </span>
-                    {selectedEventIndex === index && (
-                      <ul
-                        className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] mr-0 z-50 shadow-lg"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <li
-                          className="cursor-pointer text-black"
-                          onClick={() => {
-                            setSelectedEventIndex(null);
-                            setShowEventModal(event);
-                          }}
-                        >
-                          View Details
-                        </li>
-                        <li
-                          className="cursor-pointer text-black"
-                          onClick={() => {
-                            setSelectedEventIndex(null);
-                            showEditModal(event);
-                          }}
-                        >
-                          Edit Details
-                        </li>
-                        <li
-                          className="cursor-pointer text-red-500"
-                          onClick={() => {
-                            setSelectedEventIndex(null);
-                            showDeleteModal(event._id);
-                          }}
-                        >
-                          Delete Event
-                        </li>
-                      </ul>
-                    )}
-                  </td>
+          // 🔁 Scrollable Table Container
+          <div className="overflow-x-auto my-6">
+            <table
+              className="w-full min-w-[600px] rounded-tl-2xl rounded-tr-2xl border-separate border-spacing-0 overflow-hidden"
+              onClick={() => setSelectedEventIndex(null)}
+            >
+              <thead className="text-left bg-purple-500 ">
+                <tr>
+                  {[
+                    "Event Type",
+                    "Event Name",
+                    "Location",
+                    "Description",
+                    "Action",
+                  ].map((title, index) => (
+                    <th key={index} className="pl-4 text-white py-5">
+                      {title}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-purple-50">
+                {filteredEvents?.map((event, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-200 text-gray-600"
+                  >
+                    <td className="pl-4 py-3">{event.eventType}</td>
+                    <td className="pl-4 py-3 capitalize">{event.name}</td>
+                    <td className="pl-4 py-3">{event.location}</td>
+                    <td className="pl-4 py-3 capitalize">
+                      {getFirstFiveWords(event.description)}
+                    </td>
+                    <td className="relative">
+                      <span className="flex items-center justify-center cursor-pointer overflow-hidden">
+                        <HiOutlineDotsHorizontal
+                          size={24}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleModal(index);
+                          }}
+                        />
+                      </span>
+                      {selectedEventIndex === index && (
+                        <ul
+                          className="flex flex-col gap-2 absolute bg-white rounded-md p-3 top-[-72px] items-center justify-center w-[130px] ml-[-50px] z-50 shadow-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <li
+                            className="cursor-pointer text-black"
+                            onClick={() => {
+                              setSelectedEventIndex(null);
+                              setShowEventModal(event);
+                            }}
+                          >
+                            View Details
+                          </li>
+                          <li
+                            className="cursor-pointer text-black"
+                            onClick={() => {
+                              setSelectedEventIndex(null);
+                              showEditModal(event);
+                            }}
+                          >
+                            Edit Details
+                          </li>
+                          <li
+                            className="cursor-pointer text-red-500"
+                            onClick={() => {
+                              setSelectedEventIndex(null);
+                              showDeleteModal(event._id);
+                            }}
+                          >
+                            Delete Event
+                          </li>
+                        </ul>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
+        {/* 🔁 Pagination */}
         {isLoading ||
           (eventData && eventData.length !== 0 && (
-            <ul className="flex justify-center items-center gap-6">
+            <ul className="flex flex-wrap justify-center items-center gap-3 md:gap-6">
               <FaAngleLeft
                 size={16}
                 color="#1b1b1b"

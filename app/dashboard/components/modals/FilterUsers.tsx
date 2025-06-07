@@ -48,15 +48,15 @@ const FilterUsers: React.FC<FilterModalProps> = ({
     <>
       {contextHolder}
       <div
-        className="h-full w-full z-50 flex items-center justify-center bg-[#1b1b1b76] fixed p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#1b1b1b76] p-4"
         onClick={hideFilterModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[40%] ml-20"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-md sm:max-w-4xl sm:ml-20"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
-            <div className="w-full font-bold">Filter</div>
+            <div className="w-full font-bold text-lg">Filter</div>
             <div
               className="text-purple-600 font-bold cursor-pointer"
               onClick={applyFilters}
@@ -64,12 +64,12 @@ const FilterUsers: React.FC<FilterModalProps> = ({
               Apply
             </div>
           </div>
-          <div className="flex justify-between w-[85%]">
+          <div className="flex flex-col sm:flex-row justify-between gap-6 w-full">
             {/* Account Type Filter */}
-            <div className="flex flex-col gap-2">
-              <span className="">Account Type</span>
+            <div className="flex flex-col gap-2 sm:w-1/3">
+              <span className="font-semibold">Account Type</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="accountType"
@@ -80,7 +80,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
                   />
                   Vyber
                 </li>
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="accountType"
@@ -94,10 +94,11 @@ const FilterUsers: React.FC<FilterModalProps> = ({
               </ul>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="">Wallet Balance</span>
+            {/* Wallet Balance Filter */}
+            <div className="flex flex-col gap-2 sm:w-1/3">
+              <span className="font-semibold">Wallet Balance</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="walletBalance"
@@ -108,7 +109,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
                   />
                   0 - 50
                 </li>
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="walletBalance"
@@ -119,7 +120,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
                   />
                   51 - 100
                 </li>
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="walletBalance"
@@ -130,7 +131,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
                   />
                   101 - 150
                 </li>
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="walletBalance"
@@ -144,10 +145,11 @@ const FilterUsers: React.FC<FilterModalProps> = ({
               </ul>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="">Gender</span>
+            {/* Gender Filter */}
+            <div className="flex flex-col gap-2 sm:w-1/3">
+              <span className="font-semibold">Gender</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="gender"
@@ -158,7 +160,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
                   />
                   Male
                 </li>
-                <li className="flex gap-1">
+                <li className="flex gap-1 items-center">
                   <input
                     type="radio"
                     name="gender"

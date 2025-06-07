@@ -118,21 +118,21 @@ const AddEvent: React.FC<FilterModalProps> = ({
     <>
       {contextHolder}
       <div
-        className="h-full w-full z-50 flex items-center justify-center bg-[#1b1b1b76] fixed p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#1b1b1b76] p-4"
         onClick={hideAddModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[30%] ml-20 h-[600px] overflow-y-scroll"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-[95%] sm:max-w-[90%] md:max-w-[70%] lg:max-w-[50%] max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
-            <div className="w-full font-bold">New Event</div>
+            <div className="w-full font-bold text-base">New Event</div>
             <div className="cursor-pointer" onClick={hideAddModal}>
               <GiCancel />
             </div>
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-2 mb-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col gap-2">
               <label className="text-sm">Event Name</label>
               <input
                 type="text"
@@ -143,7 +143,8 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black"
               />
             </div>
-            <div className="flex flex-col gap-2 mb-4">
+
+            <div className="flex flex-col gap-2">
               <label className="text-sm">Event Type</label>
               <div className="relative">
                 <div
@@ -155,35 +156,26 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 </div>
                 {isDropdownOpen && (
                   <div className="absolute z-10 bg-white border border-gray-700 rounded-lg w-full mt-1 overflow-hidden">
-                    <div
-                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("Birthday Parties")}
-                    >
-                      Birthday Parties
-                    </div>
-                    <div
-                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("In House Party")}
-                    >
-                      In House Party
-                    </div>
-                    <div
-                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("Get Together")}
-                    >
-                      Get Together
-                    </div>
-                    <div
-                      className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
-                      onClick={() => handleSelectEventType("No Cup Parties")}
-                    >
-                      No Cup Parties
-                    </div>
+                    {[
+                      "Birthday Parties",
+                      "In House Party",
+                      "Get Together",
+                      "No Cup Parties",
+                    ].map((type) => (
+                      <div
+                        key={type}
+                        className="py-2 px-4 hover:bg-gray-200 cursor-pointer text-sm"
+                        onClick={() => handleSelectEventType(type)}
+                      >
+                        {type}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-2 mb-4">
+
+            <div className="flex flex-col gap-2">
               <label className="text-sm">Event Description</label>
               <textarea
                 name="eventDescription"
@@ -193,7 +185,8 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 className="border border-gray-500 rounded-md outline-none px-3 py-2 h-[80px] text-sm"
               ></textarea>
             </div>
-            <div className="flex flex-col gap-2 mb-4">
+
+            <div className="flex flex-col gap-2">
               <label className="text-sm">Event Location</label>
               <input
                 type="text"
@@ -204,7 +197,8 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black"
               />
             </div>
-            <div className="mb-3">
+
+            <div className="flex flex-col gap-2">
               <label className="text-sm">Upload Event Image</label>
               <input
                 type="file"
@@ -213,13 +207,14 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 className="border py-3 px-4 border-gray-500 rounded-lg w-full outline-none text-sm text-black cursor-pointer"
               />
             </div>
-            <div className="mb-4">
+
+            <div className="flex flex-col gap-4">
               {tickets.map((ticket, index) => (
-                <div key={index} className="flex flex-col mb-4">
+                <div key={index} className="flex flex-col gap-2">
                   <label className="text-sm">{ticket.type} Ticket</label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
-                      type=" number"
+                      type="number"
                       placeholder="Price"
                       value={ticket.price}
                       onChange={(e) =>
@@ -240,7 +235,8 @@ const AddEvent: React.FC<FilterModalProps> = ({
                 </div>
               ))}
             </div>
-            <div className="flex justify-end">
+
+            <div className="flex justify-end mt-4">
               <button
                 type="submit"
                 className="bg-purple-700 text-white py-2 px-4 rounded-lg text-sm"
