@@ -49,15 +49,15 @@ const FilterTx: React.FC<FilterModalProps> = ({
     <>
       {contextHolder}
       <div
-        className="h-full w-full z-50 flex items-center justify-center bg-[#1b1b1b76] fixed p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#1b1b1b76] p-4"
         onClick={hideFilterModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[40%] ml-20"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-lg sm:max-w-xl md:max-w-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
-            <div className="w-full font-bold">Filter</div>
+          <div className="flex justify-between mb-4 border-b border-gray-300 pb-1">
+            <div className="font-bold text-lg">Filter</div>
             <div
               className="text-purple-600 font-bold cursor-pointer"
               onClick={applyFilters}
@@ -65,143 +65,64 @@ const FilterTx: React.FC<FilterModalProps> = ({
               Apply
             </div>
           </div>
-          <div className="flex justify-between w-[85%]">
-            <div className="flex flex-col gap-2">
-              <span className="">Transaction Type</span>
+          <div className="flex flex-col md:flex-row justify-between gap-6">
+            {/* Transaction Type */}
+            <div className="flex flex-col gap-2 flex-1 min-w-[120px]">
+              <span className="font-semibold">Transaction Type</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="transactionType"
-                    value="Transfer"
-                    checked={transactionType === "Transfer"}
-                    onChange={() => setTransactionType("Transfer")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Transfer
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="transactionType"
-                    value="Deposit"
-                    checked={transactionType === "Deposit"}
-                    onChange={() => setTransactionType("Deposit")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Deposit
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="transactionType"
-                    value="Conversion"
-                    checked={transactionType === "Conversion"}
-                    onChange={() => setTransactionType("Conversion")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Conversion
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="transactionType"
-                    value="All"
-                    checked={transactionType === "All"}
-                    onChange={() => setTransactionType("All")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  All
-                </li>
+                {["Transfer", "Deposit", "Conversion", "All"].map((type) => (
+                  <li key={type} className="flex gap-2 items-center">
+                    <input
+                      type="radio"
+                      name="transactionType"
+                      value={type}
+                      checked={transactionType === type}
+                      onChange={() => setTransactionType(type)}
+                      className="accent-purple-600 cursor-pointer"
+                    />
+                    {type}
+                  </li>
+                ))}
               </ul>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="">Amount Range</span>
+            {/* Amount Range */}
+            <div className="flex flex-col gap-2 flex-1 min-w-[120px]">
+              <span className="font-semibold">Amount Range</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="amountRange"
-                    value="0 - 50"
-                    checked={amountRange === "0 - 50"}
-                    onChange={() => setAmountRange("0 - 50")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  0 - 50
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="amountRange"
-                    value="51 - 100"
-                    checked={amountRange === "51 - 100"}
-                    onChange={() => setAmountRange("51 - 100")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  51 - 100
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="amountRange"
-                    value="101 - 150"
-                    checked={amountRange === "101 - 150"}
-                    onChange={() => setAmountRange("101 - 150")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  101 - 150
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="amountRange"
-                    value="> 200"
-                    checked={amountRange === "> 200"}
-                    onChange={() => setAmountRange("> 200")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  &gt; 200
-                </li>
+                {["0 - 50", "51 - 100", "101 - 150", "> 200"].map((range) => (
+                  <li key={range} className="flex gap-2 items-center">
+                    <input
+                      type="radio"
+                      name="amountRange"
+                      value={range}
+                      checked={amountRange === range}
+                      onChange={() => setAmountRange(range)}
+                      className="accent-purple-600 cursor-pointer"
+                    />
+                    {range === "> 200" ? "> 200" : range}
+                  </li>
+                ))}
               </ul>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="">Status</span>
+            {/* Status */}
+            <div className="flex flex-col gap-2 flex-1 min-w-[120px]">
+              <span className="font-semibold">Status</span>
               <ul className="flex flex-col gap-2">
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="Pending"
-                    checked={status === "Pending"}
-                    onChange={() => setStatus("Pending")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Pending
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="Completed"
-                    checked={status === "Completed"}
-                    onChange={() => setStatus("Completed")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Completed
-                </li>
-                <li className="flex gap-1">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="Failed"
-                    checked={status === "Failed"}
-                    onChange={() => setStatus("Failed")}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                  Failed
-                </li>
+                {["Pending", "Completed", "Failed"].map((stat) => (
+                  <li key={stat} className="flex gap-2 items-center">
+                    <input
+                      type="radio"
+                      name="status"
+                      value={stat}
+                      checked={status === stat}
+                      onChange={() => setStatus(stat)}
+                      className="accent-purple-600 cursor-pointer"
+                    />
+                    {stat}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

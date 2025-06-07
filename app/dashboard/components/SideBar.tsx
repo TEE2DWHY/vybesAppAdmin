@@ -24,10 +24,10 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
   return (
     <>
       <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white p-2 rounded-full"
+        className="md:hidden fixed top-2 left-2 z-50 bg-purple-600 text-white p-2 rounded-full"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <MdMenu size={24} />
+        <MdMenu size={16} />
       </button>
 
       <div

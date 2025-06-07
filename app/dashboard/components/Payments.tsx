@@ -123,52 +123,59 @@ const Payments: React.FC<PaymentEventProps> = ({
   return (
     <>
       {contextHolder}
-      <div className="w-[84%] px-4 py-5 h-screen overflow-y-scroll">
-        <div className="border border-gray-300 py-2 px-8 rounded-xl">
+      <div className="w-full px-4 py-5 h-screen overflow-y-scroll mx-auto">
+        <div className="border border-gray-300 py-2 px-4 md:px-8 rounded-xl">
           <div>
-            <h1 className="text-3xl border-b border-gray-200 pb-2 font-bold">
+            <h1 className="text-2xl md:text-3xl border-b border-gray-200 pb-2 font-bold">
               Payments
             </h1>
           </div>
-          <div className="my-4 flex gap-8">
-            <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
+          <div className="my-4 flex flex-wrap gap-4 md:gap-8 justify-between">
+            <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
               <div>
-                <h1 className="text-3xl text-white">{allTransaction}</h1>
-                <h4 className="capitalize text-white">
+                <h1 className="text-2xl md:text-3xl text-white">
+                  {allTransaction}
+                </h1>
+                <h4 className="capitalize text-white text-sm md:text-base">
                   No of Total Transactions
                 </h4>
               </div>
             </div>
-            <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
+            <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
               <div>
-                <h1 className="text-3xl text-white">
+                <h1 className="text-2xl md:text-3xl text-white">
                   (₦){" "}
                   {totalTransactionAmountInNaira !== null
                     ? Math.ceil(totalTransactionAmountInNaira as number)
                     : 0}
                 </h1>
-                <h4 className="capitalize text-white">Total in Naira</h4>
+                <h4 className="capitalize text-white text-sm md:text-base">
+                  Total in Naira
+                </h4>
               </div>
             </div>
-            <div className="rounded-md bg-gradient-to-r from-yellow-500 to-yellow-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
+            <div className="rounded-md bg-gradient-to-r from-yellow-500 to-yellow-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
               <div>
-                <h1 className="text-3xl text-white"> (₦) {price}</h1>
-                <h4 className="capitalize text-white">
+                <h1 className="text-2xl md:text-3xl text-white">
+                  {" "}
+                  (₦) {price}
+                </h1>
+                <h4 className="capitalize text-white text-sm md:text-base">
                   Current Vyber Coin Price
                 </h4>
               </div>
             </div>
-            <div className="rounded-md bg-gradient-to-r from-pink-500 to-pink-700 py-8 px-4 w-[23%] shadow-lg flex items-center gap-8">
+            <div className="rounded-md bg-gradient-to-r from-pink-500 to-pink-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
               <div>
-                <h1 className="text-3xl text-white">4</h1>
-                <h4 className="capitalize text-white">
+                <h1 className="text-2xl md:text-3xl text-white">4</h1>
+                <h4 className="capitalize text-white text-sm md:text-base">
                   No of Transacting Users
                 </h4>
               </div>
             </div>
           </div>
-          <div className="flex justify-between items-center pt-0 border-t border-gray-300">
-            <ul className="flex gap-10 text-base">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-0 border-t border-gray-300 gap-4 md:gap-0">
+            <ul className="flex gap-4 md:gap-10 text-base flex-wrap">
               {["All", "Transfer", "Deposit", "Conversion"].map((type) => (
                 <li
                   key={type}
@@ -183,9 +190,9 @@ const Payments: React.FC<PaymentEventProps> = ({
                 </li>
               ))}
             </ul>
-            <div className="flex gap-10 items-center justify-end mt-6">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-10 items-start md:items-center w-full md:w-auto">
               <form
-                className="flex gap-3 items-center p-2 rounded-md w-[280px] bg-[#F3F4F6]"
+                className="flex gap-3 items-center p-2 rounded-md w-full md:w-[280px] bg-[#F3F4F6]"
                 onSubmit={handleSearchForTx}
               >
                 <label htmlFor="submit">
@@ -213,7 +220,7 @@ const Payments: React.FC<PaymentEventProps> = ({
               </div>
             </div>
           </div>
-          <div className="my-2">
+          <div className="my-4">
             <h3 className="">Set Vyber Coin Price (₦):</h3>
             <input
               type="text"
@@ -232,18 +239,18 @@ const Payments: React.FC<PaymentEventProps> = ({
                   setInputCoinPrice(value === "" ? null : Number(value));
                 }
               }}
-              className="mt-2 p-2 border border-gray-300 rounded-sm outline-none"
+              className="mt-2 p-2 border border-gray-300 rounded-sm outline-none w-full max-w-xs"
               required
               placeholder="Set Vyber Coin Price"
             />
             <button
               onClick={updateCoinPrice}
-              className="ml-4 p-2 bg-purple-600 text-white rounded-md"
+              className="mt-3 md:mt-0 ml-0 md:ml-4 p-2 bg-purple-600 text-white rounded-md"
             >
               Set Coin Price
             </button>
           </div>
-          <div className="my-6">
+          <div className="my-6 overflow-x-auto">
             {isLoading ? (
               <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
                 <Image
@@ -264,7 +271,7 @@ const Payments: React.FC<PaymentEventProps> = ({
                 />
               </div>
             ) : (
-              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl">
+              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl min-w-[600px]">
                 <thead className="text-left bg-purple-500 ">
                   <tr>
                     <th className="pl-4 text-white py-5">Amount</th>
@@ -303,7 +310,7 @@ const Payments: React.FC<PaymentEventProps> = ({
               </table>
             )}
             {transactions && transactions.length !== 0 && (
-              <ul className="flex justify-center items-center gap-6 mt-5">
+              <ul className="flex justify-center items-center gap-6 mt-5 flex-wrap">
                 <FaAngleLeft
                   size={16}
                   color="#1b1b1b"
