@@ -122,7 +122,7 @@ const AddEvent: React.FC<FilterModalProps> = ({
         onClick={hideAddModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-[95%] sm:max-w-[90%] md:max-w-[70%] lg:max-w-[50%] max-h-[80vh] overflow-y-auto"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-[95%] sm:max-w-[90%] md:max-w-[50%] lg:max-w-[30%] max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">

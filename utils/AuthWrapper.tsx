@@ -33,15 +33,17 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[100vh] text-lg font-medium">
-        <Image
-          src={"/images/loading.gif"}
-          width={80}
-          height={80}
-          unoptimized
-          alt="loading-img"
-        />
-        Loading Dashboard...
+      <div className="flex flex-col items-center justify-center text-lg font-medium">
+        <div className="w-full h-screen flex flex-col items-center justify-center">
+          <Image
+            src={"/images/loading.gif"}
+            width={80}
+            height={80}
+            unoptimized
+            alt="loading-img"
+          />
+          Loading Dashboard...
+        </div>
       </div>
     );
   }

@@ -52,7 +52,7 @@ const FilterUsers: React.FC<FilterModalProps> = ({
         onClick={hideFilterModal}
       >
         <div
-          className="bg-white rounded-lg p-5 flex flex-col justify-between w-full max-w-md sm:max-w-4xl sm:ml-20"
+          className="bg-white rounded-lg p-5 flex flex-col justify-between w-[90%] sm:w-[35%] sm:ml-20"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-full flex justify-between mb-4 border-b border-gray-300 pb-1">
