@@ -123,7 +123,7 @@ const Users: React.FC<UserProps> = ({
       const response = await adminInstance.get(`/get-user/${userName}`);
       setFilteredUser([response.data?.payload?.user]);
       messageApi.success(
-        <div className="font-[outfit]">Transaction Returned Successfully.</div>
+        <div className="font-[outfit]">User Returned Successfully.</div>
       );
       setUserName("");
     } catch (error: any) {
