@@ -3,7 +3,6 @@
 import { authInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
 import { message } from "antd";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect, useMemo } from "react";
@@ -48,7 +47,6 @@ const LoginPage: React.FC = () => {
   );
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Check for existing token on mount
   useEffect(() => {
     const token = cookie.getCookie("token");
     if (token) {
@@ -57,7 +55,6 @@ const LoginPage: React.FC = () => {
     }
   }, [router]);
 
-  // Form validation
   const validateField = useCallback(
     (name: keyof FormData, value: string): string | null => {
       switch (name) {
@@ -77,7 +74,6 @@ const LoginPage: React.FC = () => {
     []
   );
 
-  // Memoized validation
   const isFormValid = useMemo(() => {
     return (
       formData.email.trim() !== "" &&
@@ -94,7 +90,6 @@ const LoginPage: React.FC = () => {
 
       setFormData((prev) => ({ ...prev, [fieldName]: value }));
 
-      // Clear error when user types
       if (validationErrors[fieldName]) {
         setValidationErrors((prev) => {
           const newErrors = { ...prev };
@@ -147,7 +142,6 @@ const LoginPage: React.FC = () => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      // Validate all fields
       const emailError = validateField("email", formData.email);
       const passwordError = validateField("password", formData.password);
 
@@ -176,11 +170,9 @@ const LoginPage: React.FC = () => {
           responseMessage || "Welcome back! Redirecting..."
         );
 
-        // Store token with expiration based on remember me
         const expirationDays = rememberMe ? 30 : 1;
         cookie.storeCookie("token", accessToken, expirationDays);
 
-        // Small delay for better UX
         setTimeout(() => {
           router.push("/dashboard");
         }, 1000);
@@ -231,13 +223,11 @@ const LoginPage: React.FC = () => {
     <>
       {contextHolder}
       <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-300 to-blue-200 relative overflow-hidden">
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Logo */}
         <div className="absolute top-6 left-6 z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
@@ -247,7 +237,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Security Badge */}
         <div className="absolute top-6 right-6 z-10">
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -257,7 +246,6 @@ const LoginPage: React.FC = () => {
 
         <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 mt-14">
           <div className="w-full max-w-md">
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <IoPersonOutline className="text-white" size={32} />
@@ -268,10 +256,8 @@ const LoginPage: React.FC = () => {
               <p className="text-white/80">Sign in to your admin dashboard</p>
             </div>
 
-            {/* Login Form */}
             <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
               <form onSubmit={handleLogin} className="space-y-6" noValidate>
-                {/* Email field */}
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
@@ -308,7 +294,6 @@ const LoginPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Password field */}
                 <div className="space-y-2">
                   <label
                     htmlFor="password"
@@ -358,7 +343,6 @@ const LoginPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Remember me and forgot password */}
                 <div className="flex items-center justify-between">
                   <label className="flex items-center">
                     <input
@@ -380,7 +364,6 @@ const LoginPage: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Submit button */}
                 <button
                   type="submit"
                   className="w-full bg-white text-purple-600 py-3 px-4 rounded-xl font-semibold hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -400,7 +383,6 @@ const LoginPage: React.FC = () => {
                 </button>
               </form>
 
-              {/* Register link */}
               <div className="mt-6 text-center">
                 <p className="text-white/80 text-sm">
                   Need an admin account?{" "}
@@ -414,7 +396,6 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Features */}
             <div className="mt-8 grid grid-cols-2 gap-4">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
                 <IoShieldCheckmarkOutline className="w-8 h-8 text-white mx-auto mb-2" />
@@ -426,7 +407,6 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Sparkles animation */}
             <div className="w-full h-20 relative flex items-center justify-center mt-8">
               <SparklesCore
                 background="transparent"

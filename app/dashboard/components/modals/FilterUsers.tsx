@@ -217,7 +217,6 @@ const FilterUsers: React.FC<FilterModalProps> = ({
     </label>
   );
 
-  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {

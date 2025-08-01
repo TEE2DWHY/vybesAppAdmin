@@ -86,7 +86,6 @@ const Payments: React.FC<PaymentEventProps> = ({
   setTransactions,
   transactions,
 }) => {
-  // State management
   const [txType, setTxType] = useState<TransactionType>("All");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -101,20 +100,17 @@ const Payments: React.FC<PaymentEventProps> = ({
   const [txId, setTxId] = useState<string>("");
   const [pagination, setPagination] = useState<number>(1);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [transactingUsers] = useState<number>(4); // This seems to be static in original
+  const [transactingUsers] = useState<number>(4);
 
-  // Instances and utilities
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Transaction type options
   const transactionTypes: TransactionType[] = useMemo(
     () => ["All", "Transfer", "Deposit", "Conversion"],
     []
   );
 
-  // Memoized stats
   const stats = useMemo(
     () => [
       {
@@ -147,7 +143,6 @@ const Payments: React.FC<PaymentEventProps> = ({
     [allTransaction, totalTransactionAmountInNaira, price, transactingUsers]
   );
 
-  // Utility functions
   const showMessage = useCallback(
     (type: "success" | "error", content: string) => {
       messageApi[type]({
@@ -174,7 +169,6 @@ const Payments: React.FC<PaymentEventProps> = ({
     }).format(amount);
   }, []);
 
-  // API calls
   const fetchAllTransactions = useCallback(
     async (page: number, showLoader = true) => {
       if (showLoader) setIsLoading(true);
@@ -297,7 +291,6 @@ const Payments: React.FC<PaymentEventProps> = ({
   );
 
   const handlePriceInputChange = useCallback((value: string) => {
-    // Allow only numbers and one decimal point
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setInputCoinPrice(value);
     }
@@ -343,7 +336,6 @@ const Payments: React.FC<PaymentEventProps> = ({
             </div>
           </div>
 
-          {/* Stats Cards */}
           <div className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {stats.map((stat, index) => (
@@ -359,7 +351,6 @@ const Payments: React.FC<PaymentEventProps> = ({
               ))}
             </div>
 
-            {/* Coin Price Update Section */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
                 Update Vyber Coin Price
@@ -399,9 +390,7 @@ const Payments: React.FC<PaymentEventProps> = ({
               </div>
             </div>
 
-            {/* Filters and Actions */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-              {/* Transaction Type Tabs */}
               <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                 {transactionTypes.map((type) => (
                   <button
@@ -418,7 +407,6 @@ const Payments: React.FC<PaymentEventProps> = ({
                 ))}
               </div>
 
-              {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                 <form
                   onSubmit={handleSearchForTx}
@@ -454,14 +442,12 @@ const Payments: React.FC<PaymentEventProps> = ({
               </div>
             </div>
 
-            {/* Content */}
             {isLoading ? (
               <LoadingSpinner />
             ) : transactions.length === 0 ? (
               <EmptyState txType={txType} />
             ) : (
               <>
-                {/* Table */}
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
                   <table className="w-full min-w-[800px]">
                     <thead className="bg-purple-500">
@@ -523,7 +509,6 @@ const Payments: React.FC<PaymentEventProps> = ({
                   </table>
                 </div>
 
-                {/* Pagination */}
                 {totalPage > 1 && (
                   <div className="flex justify-center items-center gap-2 mt-6">
                     <button

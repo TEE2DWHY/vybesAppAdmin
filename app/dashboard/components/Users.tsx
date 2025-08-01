@@ -85,7 +85,6 @@ const Users: React.FC<UserProps> = ({
   showDeleteModal,
   setShowUserModal,
 }) => {
-  // State management
   const [accountType, setAccountType] = useState<AccountType>("All");
   const [pagination, setPagination] = useState<number>(1);
   const [selectedUserIndex, setSelectedUserIndex] = useState<number | null>(
@@ -99,20 +98,17 @@ const Users: React.FC<UserProps> = ({
   const [userName, setUserName] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Instances and utilities
   const token = cookie.getCookie("token");
 
   console.log(token);
   const adminInstance = createAdminInstance(token);
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Account type options
   const accountTypes: AccountType[] = useMemo(
     () => ["All", "Vyber", "Baddie"],
     []
   );
 
-  // Computed values
   const pageNumbers = useMemo(() => {
     return Array.from({ length: totalPage }, (_, i) => i + 1);
   }, [totalPage]);
@@ -130,7 +126,6 @@ const Users: React.FC<UserProps> = ({
     };
   }, [userData]);
 
-  // Event handlers
   const toggleActionMenu = useCallback(
     (index: number | null) => {
       setSelectedUserIndex(selectedUserIndex === index ? null : index);
@@ -159,7 +154,6 @@ const Users: React.FC<UserProps> = ({
     }).format(amount);
   }, []);
 
-  // API calls
   const fetchUsers = useCallback(
     async (showLoader = true) => {
       console.log("=== FETCH USERS CALLED ===");
@@ -275,12 +269,10 @@ const Users: React.FC<UserProps> = ({
     [totalPage, pagination, closeActionMenu]
   );
 
-  // Main data fetching effect
   useEffect(() => {
     fetchUsers();
   }, [pagination, accountType]);
 
-  // Effect for account type filtering
   useEffect(() => {
     if (accountType !== "All") {
       const filtered = allUsers.filter(
@@ -292,7 +284,6 @@ const Users: React.FC<UserProps> = ({
     }
   }, [accountType, allUsers, setFilteredUser]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => closeActionMenu();
 
@@ -307,7 +298,6 @@ const Users: React.FC<UserProps> = ({
       {contextHolder}
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
@@ -331,7 +321,6 @@ const Users: React.FC<UserProps> = ({
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatsCard
@@ -364,9 +353,7 @@ const Users: React.FC<UserProps> = ({
             />
           </div>
 
-          {/* Filters and Actions */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-            {/* Account Type Tabs */}
             <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
               {accountTypes.map((type) => (
                 <button
@@ -383,7 +370,6 @@ const Users: React.FC<UserProps> = ({
               ))}
             </div>
 
-            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               <form onSubmit={handleSearch} className="flex items-center">
                 <div className="relative flex items-center bg-gray-100 rounded-lg overflow-hidden">
@@ -416,14 +402,12 @@ const Users: React.FC<UserProps> = ({
             </div>
           </div>
 
-          {/* Content */}
           {isLoading ? (
             <LoadingSpinner />
           ) : filteredUser.length === 0 ? (
             <EmptyState />
           ) : (
             <>
-              {/* Table */}
               <div className="overflow-x-auto rounded-lg border border-gray-200">
                 <table className="w-full min-w-[800px]">
                   <thead className="bg-purple-500">
@@ -527,7 +511,6 @@ const Users: React.FC<UserProps> = ({
                 </table>
               </div>
 
-              {/* Pagination */}
               {totalPage > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-6">
                   <button

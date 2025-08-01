@@ -17,7 +17,6 @@ interface SideBarProps {
 const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Memoized menu items to prevent unnecessary re-renders
   const menuItems: MenuItem[] = React.useMemo(
     () => [
       { name: "users", label: "Manage Users", icon: <FaUsers size={20} /> },
@@ -35,7 +34,6 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
     []
   );
 
-  // Optimized toggle function
   const toggleSidebar = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
@@ -44,16 +42,14 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
     setIsOpen(false);
   }, []);
 
-  // Handle menu item selection
   const handleMenuItemClick = useCallback(
     (itemName: string) => {
       setActiveTab(itemName);
-      setIsOpen(false); // Close mobile menu after selection
+      setIsOpen(false);
     },
     [setActiveTab]
   );
 
-  // Handle escape key to close sidebar
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
@@ -63,7 +59,6 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
-      // Prevent body scroll when sidebar is open on mobile
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -87,7 +82,6 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
         {isOpen ? <MdClose size={20} /> : <MdMenu size={20} />}
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`fixed z-40 top-0 left-0 h-screen w-72 bg-gradient-to-b from-purple-600 via-purple-500 to-white shadow-2xl transition-transform duration-300 ease-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
@@ -96,7 +90,6 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
         aria-hidden={!isOpen && "true"}
       >
         <div className="flex flex-col h-full">
-          {/* Navigation */}
           <nav
             className="flex-1 flex items-center justify-center"
             role="navigation"
@@ -132,14 +125,12 @@ const SideBar: React.FC<SideBarProps> = ({ activeTab, setActiveTab }) => {
             </ul>
           </nav>
 
-          {/* Footer */}
           <div className="p-4">
             <Footer />
           </div>
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"

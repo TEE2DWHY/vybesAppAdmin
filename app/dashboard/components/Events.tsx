@@ -86,7 +86,6 @@ const Events: React.FC<EventsProps> = ({
   setShowEventModal,
   showEditModal,
 }) => {
-  // State management
   const [eventType, setEventType] = useState<EventType>("All");
   const [pagination, setPagination] = useState<number>(1);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(
@@ -99,18 +98,15 @@ const Events: React.FC<EventsProps> = ({
   const [eventName, setEventName] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  // Instances and utilities
   const token = cookie.getCookie("token");
   const adminInstance = createAdminInstance(token);
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Event type options
   const eventTypes: EventType[] = useMemo(
     () => ["All", "Birthday Parties", "No-Cup Parties"],
     []
   );
 
-  // Computed values
   const pageNumbers = useMemo(() => {
     return Array.from({ length: totalPage }, (_, i) => i + 1);
   }, [totalPage]);
@@ -137,7 +133,6 @@ const Events: React.FC<EventsProps> = ({
     };
   }, [eventData]);
 
-  // Utility functions
   const showMessage = useCallback(
     (type: "success" | "error", content: string) => {
       messageApi[type]({
@@ -168,7 +163,6 @@ const Events: React.FC<EventsProps> = ({
     setSelectedEventIndex(null);
   }, []);
 
-  // API calls
   const fetchAllEvents = useCallback(
     async (showLoader = true) => {
       if (showLoader) setIsLoading(true);
@@ -290,7 +284,6 @@ const Events: React.FC<EventsProps> = ({
     }
   }, [refetchEvents, fetchAllEvents]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => closeActionMenu();
 
@@ -324,7 +317,6 @@ const Events: React.FC<EventsProps> = ({
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <StatsCard
@@ -350,7 +342,6 @@ const Events: React.FC<EventsProps> = ({
             />
           </div>
 
-          {/* Filters and Actions */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             {/* Event Type Tabs */}
             <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -369,7 +360,6 @@ const Events: React.FC<EventsProps> = ({
               ))}
             </div>
 
-            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
               <button
                 onClick={handleRefresh}
@@ -408,14 +398,12 @@ const Events: React.FC<EventsProps> = ({
             </div>
           </div>
 
-          {/* Content */}
           {isLoading ? (
             <LoadingSpinner />
           ) : filteredEvents.length === 0 ? (
             <EmptyState eventType={eventType} />
           ) : (
             <>
-              {/* Table */}
               <div className="overflow-x-auto rounded-lg border border-gray-200">
                 <table className="w-full min-w-[700px]">
                   <thead className="bg-purple-500">
