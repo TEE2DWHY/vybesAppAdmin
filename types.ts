@@ -14,12 +14,12 @@ export interface User {
   image: string;
   dateOfBirth: string;
   followers: {
-    baddies: number;
-    vybers: number;
+    baddies: [string];
+    vybers: [string];
   };
   following: {
-    baddies: number;
-    vybers: number;
+    baddies: [string];
+    vybers: [string];
   };
   hobbies: string[];
   height: string;
