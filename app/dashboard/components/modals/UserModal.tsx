@@ -35,15 +35,12 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
-  // State management
   const [showAnimation, setShowAnimation] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  // Refs
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Handle escape key and outside click
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -62,7 +59,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     [hideUserModal]
   );
 
-  // Format currency
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -70,7 +66,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     }).format(amount);
   }, []);
 
-  // Get account type styling
   const getAccountTypeStyle = useCallback((accountType: string) => {
     switch (accountType.toLowerCase()) {
       case "vyber":
@@ -84,16 +79,12 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     }
   }, []);
 
-  // Setup event listeners and animations
   useEffect(() => {
-    // Add entrance animation
     setShowAnimation(true);
 
-    // Add event listeners
     document.addEventListener("keydown", handleEscape);
     document.addEventListener("mousedown", handleOutsideClick);
 
-    // Prevent body scroll
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -103,7 +94,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     };
   }, [handleEscape, handleOutsideClick]);
 
-  // Info Item Component
   const InfoItem: React.FC<{
     icon: React.ReactNode;
     label: string;
@@ -121,7 +111,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     </div>
   );
 
-  // Stats Card Component
   const StatsCard: React.FC<{
     icon: React.ReactNode;
     label: string;
@@ -137,8 +126,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
     </div>
   );
 
-  console.log(user);
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
@@ -150,10 +137,8 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
         aria-labelledby="user-modal-title"
         aria-modal="true"
       >
-        {/* Header */}
         <div className="relative p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
           <div className="flex items-center gap-4">
-            {/* User Avatar */}
             <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
               {!imageError ? (
                 <>
@@ -181,13 +166,11 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
                 </div>
               )}
 
-              {/* Online/Status Indicator */}
               {user.active && (
                 <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
               )}
             </div>
 
-            {/* User Info */}
             <div className="flex-1 min-w-0">
               <h1
                 id="user-modal-title"
@@ -216,10 +199,8 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
           <div className="p-6 space-y-6">
-            {/* Bio Section */}
             {user.bio && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
@@ -232,7 +213,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
               </div>
             )}
 
-            {/* Contact Information */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-4">
                 Contact Information
@@ -329,7 +309,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
               </div>
             </div>
 
-            {/* Financial Information */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-4">
                 Financial Information
@@ -375,7 +354,6 @@ const UserModal: React.FC<UserModalProps> = ({ hideUserModal, user }) => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="border-t border-gray-200 p-4 bg-gray-50">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">

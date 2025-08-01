@@ -32,7 +32,7 @@ const TRANSACTION_TYPES = [
   { value: "All", label: "All Types", color: "text-gray-600" },
   { value: "Transfer", label: "Transfer", color: "text-blue-600" },
   { value: "Deposit", label: "Deposit", color: "text-green-600" },
-  { value: "Conversion", label: "Conversion", color: "text-orange-600" },
+  { value: "Converted", label: "Converted", color: "text-orange-600" },
 ];
 
 const AMOUNT_RANGES = [

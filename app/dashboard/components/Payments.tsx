@@ -17,7 +17,7 @@ interface PaymentEventProps {
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
-type TransactionType = "All" | "Transfer" | "Deposit" | "Conversion";
+type TransactionType = "All" | "Transfer" | "Deposit" | "Converted";
 
 interface StatsCardProps {
   title: string;
@@ -107,7 +107,7 @@ const Payments: React.FC<PaymentEventProps> = ({
   const [messageApi, contextHolder] = message.useMessage();
 
   const transactionTypes: TransactionType[] = useMemo(
-    () => ["All", "Transfer", "Deposit", "Conversion"],
+    () => ["All", "Transfer", "Deposit", "Converted"],
     []
   );
 
