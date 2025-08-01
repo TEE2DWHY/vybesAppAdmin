@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { IoMdSearch } from "react-icons/io";
 import { CiFilter } from "react-icons/ci";
 import { FaAngleLeft, FaChevronRight } from "react-icons/fa6";
+import { FiRefreshCw, FiDollarSign, FiActivity } from "react-icons/fi";
+import { MdOutlineAttachMoney, MdTrendingUp } from "react-icons/md";
 import { createAdminInstance } from "@/config/axios";
 import { cookie } from "@/utils/storage";
-import Image from "next/image";
-import { Empty } from "antd";
+import { Empty, message, Spin } from "antd";
 import { Transaction } from "@/types";
 import { generatePageNumbers } from "@/utils/generatePageNumbers";
-import { message } from "antd";
 
 interface PaymentEventProps {
   setShowFilterTxModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,336 +17,552 @@ interface PaymentEventProps {
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
+type TransactionType = "All" | "Transfer" | "Deposit" | "Conversion";
+
+interface StatsCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  gradient: string;
+  isLoading?: boolean;
+  prefix?: string;
+}
+
+const StatsCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  icon,
+  gradient,
+  isLoading = false,
+  prefix = "",
+}) => (
+  <div
+    className={`rounded-xl ${gradient} p-6 shadow-lg flex items-center gap-4 transition-transform hover:scale-105 min-w-[200px] flex-1`}
+  >
+    <div className="text-white opacity-90 flex-shrink-0">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <div className="text-2xl md:text-3xl font-bold text-white truncate">
+        {isLoading ? (
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+        ) : (
+          `${prefix}${
+            typeof value === "number" ? value.toLocaleString() : value
+          }`
+        )}
+      </div>
+      <div className="text-white/80 text-sm font-medium mt-1">{title}</div>
+    </div>
+  </div>
+);
+
+const LoadingSpinner: React.FC = () => (
+  <div className="h-[50vh] flex flex-col items-center justify-center">
+    <div className="relative">
+      <div className="w-16 h-16 border-4 border-purple-200 border-solid rounded-full animate-spin">
+        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-purple-500 border-solid rounded-full animate-spin"></div>
+      </div>
+    </div>
+    <p className="text-gray-600 text-lg font-medium mt-4">
+      Fetching transactions...
+    </p>
+  </div>
+);
+
+const EmptyState: React.FC<{ txType: string }> = ({ txType }) => (
+  <div className="h-[50vh] flex items-center justify-center">
+    <Empty
+      image={Empty.PRESENTED_IMAGE_SIMPLE}
+      description={
+        <span className="font-[outfit] text-gray-500">
+          No {txType.toLowerCase()} transactions found
+        </span>
+      }
+    />
+  </div>
+);
+
 const Payments: React.FC<PaymentEventProps> = ({
   setShowFilterTxModal,
   setTransactions,
   transactions,
 }) => {
-  const [txType, setTxType] = useState<string | null>("All");
+  // State management
+  const [txType, setTxType] = useState<TransactionType>("All");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [isPriceUpdating, setIsPriceUpdating] = useState<boolean>(false);
   const [totalTransactionAmountInNaira, setTotalTransactionAmountInNaira] =
-    useState<Number | null>(null);
-  const [allTransaction, setAllTransactions] = useState<string>("");
+    useState<number>(0);
+  const [allTransaction, setAllTransactions] = useState<string>("0");
   const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([]);
-  const [totalPage, setTotalPage] = useState<number | null>();
-  const [inputCoinPrice, setInputCoinPrice] = useState<number | null>();
-  const [price, setPrice] = useState<number>();
+  const [totalPage, setTotalPage] = useState<number>(0);
+  const [inputCoinPrice, setInputCoinPrice] = useState<string>("");
+  const [price, setPrice] = useState<number>(0);
   const [txId, setTxId] = useState<string>("");
-  const [pagination, setPagination] = useState(1);
+  const [pagination, setPagination] = useState<number>(1);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [transactingUsers] = useState<number>(4); // This seems to be static in original
+
+  // Instances and utilities
   const token = cookie.getCookie("token");
-  const [messageApi, contextHolder] = message.useMessage();
   const adminInstance = createAdminInstance(token);
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const fetchAllTransactions = async (page: number) => {
-    setIsLoading(true);
-    try {
-      const response = await adminInstance.get("/all-transactions", {
-        params: {
-          page: page,
-          transactionType: txType,
-        },
+  // Transaction type options
+  const transactionTypes: TransactionType[] = useMemo(
+    () => ["All", "Transfer", "Deposit", "Conversion"],
+    []
+  );
+
+  // Memoized stats
+  const stats = useMemo(
+    () => [
+      {
+        title: "Total Transactions",
+        value: allTransaction,
+        icon: <FiActivity size={32} />,
+        gradient: "bg-gradient-to-r from-blue-500 to-blue-600",
+      },
+      {
+        title: "Total Amount (₦)",
+        value: Math.ceil(totalTransactionAmountInNaira),
+        icon: <MdOutlineAttachMoney size={32} />,
+        gradient: "bg-gradient-to-r from-green-500 to-green-600",
+        prefix: "₦",
+      },
+      {
+        title: "Vyber Coin Price",
+        value: price,
+        icon: <FiDollarSign size={32} />,
+        gradient: "bg-gradient-to-r from-yellow-500 to-yellow-600",
+        prefix: "₦",
+      },
+      {
+        title: "Transacting Users",
+        value: transactingUsers,
+        icon: <MdTrendingUp size={32} />,
+        gradient: "bg-gradient-to-r from-pink-500 to-pink-600",
+      },
+    ],
+    [allTransaction, totalTransactionAmountInNaira, price, transactingUsers]
+  );
+
+  // Utility functions
+  const showMessage = useCallback(
+    (type: "success" | "error", content: string) => {
+      messageApi[type]({
+        content: <div className="font-[outfit]">{content}</div>,
+        duration: 3,
       });
-      setTransactions(response.data?.payload?.transactions);
-      setTotalTransactionAmountInNaira(
-        response.data?.payload?.totalAmountTransactedInNaira
-      );
-      setTotalPage(response.data.payload?.totalPage);
-      setAllTransactions(response.data?.payload?.totalNoOfTransactions);
-      setPrice(response.data?.payload?.price);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [messageApi]
+  );
 
-  useEffect(() => {
-    fetchAllTransactions(pagination);
-  }, [pagination, txType]);
-
-  const updateCoinPrice = async () => {
-    if (inputCoinPrice === 0 || !inputCoinPrice) {
-      return messageApi.error(
-        <div className="font-[outfit]">Please provide valid price.</div>
-      );
-    }
-    try {
-      const response = await adminInstance.post("/set-price", {
-        price: inputCoinPrice,
-      });
-      setPrice(response.data?.payload);
-      setInputCoinPrice(null);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const formatTime = (dateString: string) => {
+  const formatTime = useCallback((dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  };
+  }, []);
+
+  const formatCurrency = useCallback((amount: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+    }).format(amount);
+  }, []);
+
+  // API calls
+  const fetchAllTransactions = useCallback(
+    async (page: number, showLoader = true) => {
+      if (showLoader) setIsLoading(true);
+
+      try {
+        const response = await adminInstance.get("/all-transactions", {
+          params: {
+            page: page,
+            transactionType: txType === "All" ? undefined : txType,
+          },
+        });
+
+        const { payload } = response.data;
+
+        setTransactions(payload?.transactions || []);
+        setTotalTransactionAmountInNaira(
+          payload?.totalAmountTransactedInNaira || 0
+        );
+        setTotalPage(payload?.totalPage || 0);
+        setAllTransactions(payload?.totalNoOfTransactions || "0");
+        setPrice(payload?.price || 0);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+        showMessage("error", "Failed to fetch transactions. Please try again.");
+      } finally {
+        if (showLoader) setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [txType, adminInstance, setTransactions, showMessage]
+  );
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    fetchAllTransactions(pagination, false);
+  }, [fetchAllTransactions, pagination]);
+
+  const updateCoinPrice = useCallback(async () => {
+    const priceValue = parseFloat(inputCoinPrice);
+
+    if (!priceValue || priceValue <= 0) {
+      showMessage("error", "Please provide a valid price greater than 0");
+      return;
+    }
+
+    setIsPriceUpdating(true);
+
+    try {
+      const response = await adminInstance.post("/set-price", {
+        price: priceValue,
+      });
+
+      setPrice(response.data?.payload || priceValue);
+      setInputCoinPrice("");
+      showMessage(
+        "success",
+        `Coin price updated to ₦${priceValue.toLocaleString()}`
+      );
+    } catch (error: any) {
+      console.error("Error updating price:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to update price";
+      showMessage("error", errorMessage);
+    } finally {
+      setIsPriceUpdating(false);
+    }
+  }, [inputCoinPrice, adminInstance, showMessage]);
+
+  const handleTxTypeChange = useCallback((type: TransactionType) => {
+    setTxType(type);
+    setPagination(1);
+  }, []);
+
+  const handleSearchForTx = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!txId.trim()) {
+        showMessage("error", "Please enter a transaction ID");
+        return;
+      }
+
+      setIsSearching(true);
+
+      try {
+        const response = await adminInstance.get(
+          `/get-transaction/${txId.trim()}`
+        );
+        const transaction = response.data?.payload?.transaction;
+
+        if (transaction) {
+          setTransactions([transaction]);
+          showMessage("success", "Transaction found successfully");
+        } else {
+          setTransactions([]);
+          showMessage("error", "Transaction not found");
+        }
+
+        setTxId("");
+      } catch (error: any) {
+        console.error("Search error:", error);
+        const errorMessage =
+          error.response?.data?.message || "Transaction not found";
+        showMessage("error", errorMessage);
+        setTransactions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [txId, adminInstance, setTransactions, showMessage]
+  );
+
+  const handlePaginationChange = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPage && page !== pagination) {
+        setPagination(page);
+      }
+    },
+    [totalPage, pagination]
+  );
+
+  const handlePriceInputChange = useCallback((value: string) => {
+    // Allow only numbers and one decimal point
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      setInputCoinPrice(value);
+    }
+  }, []);
+
+  // Effects
+  useEffect(() => {
+    fetchAllTransactions(pagination);
+  }, [pagination, txType]);
 
   useEffect(() => {
-    if (totalPage) {
+    if (totalPage > 0) {
       generatePageNumbers(totalPage, setPageNumbers, pagination);
     }
   }, [pagination, totalPage]);
 
-  const handleTxTypeChange = (type: string) => {
-    setTxType(type);
-    setPagination(1);
-  };
-
-  const handleSearchForTx = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await adminInstance.get(`/get-transaction/${txId}`);
-      setTransactions([response.data?.payload?.transaction]);
-      messageApi.success(
-        <div className="font-[outfit]">Transaction Returned Successfully.</div>
-      );
-      setTxId("");
-    } catch (error: any) {
-      console.log(error);
-      messageApi.error(
-        <div className="font-[outfit] capitalize">
-          {error.response.data.message}
-        </div>
-      );
-    }
-  };
-
   return (
     <>
       {contextHolder}
-      <div className="w-full px-4 py-5 h-screen overflow-y-scroll mx-auto">
-        <div className="border border-gray-300 py-2 px-4 md:px-8 rounded-xl">
-          <div>
-            <h1 className="text-2xl md:text-3xl border-b border-gray-200 pb-2 font-bold">
-              Payments
-            </h1>
-          </div>
-          <div className="my-4 flex flex-wrap gap-4 md:gap-8 justify-between">
-            <div className="rounded-md bg-gradient-to-r from-blue-500 to-blue-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
+      <div className="w-full px-4 py-5 h-screen overflow-y-auto mx-auto">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-2xl md:text-3xl text-white">
-                  {allTransaction}
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Payments Management
                 </h1>
-                <h4 className="capitalize text-white text-sm md:text-base">
-                  No of Total Transactions
-                </h4>
+                <p className="text-gray-600 mt-1">
+                  Monitor and manage all transactions
+                </p>
               </div>
-            </div>
-            <div className="rounded-md bg-gradient-to-r from-green-500 to-green-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl text-white">
-                  (₦){" "}
-                  {totalTransactionAmountInNaira !== null
-                    ? Math.ceil(totalTransactionAmountInNaira as number)
-                    : 0}
-                </h1>
-                <h4 className="capitalize text-white text-sm md:text-base">
-                  Total in Naira
-                </h4>
-              </div>
-            </div>
-            <div className="rounded-md bg-gradient-to-r from-yellow-500 to-yellow-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl text-white">
-                  {" "}
-                  (₦) {price}
-                </h1>
-                <h4 className="capitalize text-white text-sm md:text-base">
-                  Current Vyber Coin Price
-                </h4>
-              </div>
-            </div>
-            <div className="rounded-md bg-gradient-to-r from-pink-500 to-pink-700 py-6 px-4 flex-1 min-w-[150px] shadow-lg flex items-center gap-4 md:gap-8">
-              <div>
-                <h1 className="text-2xl md:text-3xl text-white">4</h1>
-                <h4 className="capitalize text-white text-sm md:text-base">
-                  No of Transacting Users
-                </h4>
-              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <FiRefreshCw
+                  className={`${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </button>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-0 border-t border-gray-300 gap-4 md:gap-0">
-            <ul className="flex gap-4 md:gap-10 text-base flex-wrap">
-              {["All", "Transfer", "Deposit", "Conversion"].map((type) => (
-                <li
-                  key={type}
-                  className={`${
-                    txType === type
-                      ? "text-purple-500 font-bold"
-                      : "text-[#BFBFBF]"
-                  } cursor-pointer`}
-                  onClick={() => handleTxTypeChange(type)}
-                >
-                  {type}
-                </li>
+
+          {/* Stats Cards */}
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {stats.map((stat, index) => (
+                <StatsCard
+                  key={index}
+                  title={stat.title}
+                  value={stat.value}
+                  icon={stat.icon}
+                  gradient={stat.gradient}
+                  prefix={stat.prefix}
+                  isLoading={isLoading}
+                />
               ))}
-            </ul>
-            <div className="flex flex-col md:flex-row gap-4 md:gap-10 items-start md:items-center w-full md:w-auto">
-              <form
-                className="flex gap-3 items-center p-2 rounded-md w-full md:w-[280px] bg-[#F3F4F6]"
-                onSubmit={handleSearchForTx}
-              >
-                <label htmlFor="submit">
-                  <IoMdSearch size={24} className="text-black cursor-pointer" />
-                </label>
-                <input
-                  type="text"
-                  placeholder="Search For Tx By TxId"
-                  className="outline-none flex-1 bg-transparent text-black text-base"
-                  required
-                  name="txId"
-                  onChange={(e) => setTxId(e.target.value)}
-                  value={txId}
-                />
-                <button id="submit" className="hidden">
-                  Submit
+            </div>
+
+            {/* Coin Price Update Section */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Update Vyber Coin Price
+              </h3>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                <div className="flex-1 max-w-xs">
+                  <label
+                    htmlFor="coin-price"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    New Price (₦)
+                  </label>
+                  <input
+                    id="coin-price"
+                    type="text"
+                    value={inputCoinPrice}
+                    onChange={(e) => handlePriceInputChange(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    placeholder="Enter new price"
+                    disabled={isPriceUpdating}
+                  />
+                </div>
+                <button
+                  onClick={updateCoinPrice}
+                  disabled={isPriceUpdating || !inputCoinPrice}
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                >
+                  {isPriceUpdating ? (
+                    <>
+                      <Spin size="small" className="mr-2" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Price"
+                  )}
                 </button>
-              </form>
-              <div
-                className="flex gap-2 items-center p-2 rounded-md bg-[#F3F4F6] cursor-pointer"
-                onClick={() => setShowFilterTxModal(true)}
-              >
-                <CiFilter size={24} color="#565E6C" />
-                <span className="text-[#565E6C]">Filter</span>
               </div>
             </div>
-          </div>
-          <div className="my-4">
-            <h3 className="">Set Vyber Coin Price (₦):</h3>
-            <input
-              type="text"
-              onKeyPress={(e) => {
-                if (
-                  !/[0-9.]/.test(e.key) &&
-                  e.key !== "Backspace" &&
-                  e.key !== "Tab"
-                ) {
-                  e.preventDefault();
-                }
-              }}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                  setInputCoinPrice(value === "" ? null : Number(value));
-                }
-              }}
-              className="mt-2 p-2 border border-gray-300 rounded-sm outline-none w-full max-w-xs"
-              required
-              placeholder="Set Vyber Coin Price"
-            />
-            <button
-              onClick={updateCoinPrice}
-              className="mt-3 md:mt-0 ml-0 md:ml-4 p-2 bg-purple-600 text-white rounded-md"
-            >
-              Set Coin Price
-            </button>
-          </div>
-          <div className="my-6 overflow-x-auto">
-            {isLoading ? (
-              <div className="h-[50vh] flex flex-col items-center justify-center text-lg">
-                <Image
-                  src={"/images/bubble.gif"}
-                  width={70}
-                  height={70}
-                  unoptimized
-                  alt="loading-img"
-                />
-                Fetching Data...
-              </div>
-            ) : transactions && transactions.length === 0 ? (
-              <div className="h-[35vh] flex items-center justify-center text-gray-600 text-lg">
-                <Empty
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description={`No ${txType} Data Found.`}
-                  className="font-[outfit] capitalize"
-                />
-              </div>
-            ) : (
-              <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-tl-xl rounded-tr-xl min-w-[600px]">
-                <thead className="text-left bg-purple-500 ">
-                  <tr>
-                    <th className="pl-4 text-white py-5">Amount</th>
-                    <th className="pl-4 text-white py-5">Transaction Id</th>
-                    <th className="pl-4 text-white py-5">Sender</th>
-                    <th className="pl-4 text-white py-5">Receiver</th>
-                    <th className="pl-4 text-white py-5">Type</th>
-                    <th className="pl-4 text-white py-5">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-purple-50">
-                  {transactions &&
-                    transactions.map((transaction, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <td className="pl-4 py-3 capitalize">
-                          {transaction.amount}
-                        </td>
-                        <td className="pl-4 py-3 capitalize">
-                          {transaction.transactionId}
-                        </td>
-                        <td className="pl-4 py-3 capitalize">
-                          {transaction.sender}
-                        </td>
-                        <td className="pl-4 py-3 capitalize">
-                          {transaction.receiver}
-                        </td>
-                        <td className="pl-4 py-3 capitalize">
-                          {transaction.transactionType}
-                        </td>
-                        <td className="pl-4 py-3 capitalize">
-                          {formatTime(transaction.createdAt)}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            )}
-            {transactions && transactions.length !== 0 && (
-              <ul className="flex justify-center items-center gap-6 mt-5 flex-wrap">
-                <FaAngleLeft
-                  size={16}
-                  color="#1b1b1b"
-                  cursor={"pointer"}
-                  onClick={() =>
-                    setPagination((prev) => (prev <= 1 ? 1 : prev - 1))
-                  }
-                />
-                {pageNumbers.map((page, index) => (
-                  <li
-                    key={index}
-                    className={`${
-                      pagination === page ? "bg-purple-500" : "bg-gray-500"
-                    } rounded-md text-white px-3 py-1 cursor-pointer`}
-                    onClick={() =>
-                      typeof page === "number" && setPagination(page)
-                    }
+
+            {/* Filters and Actions */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+              {/* Transaction Type Tabs */}
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                {transactionTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => handleTxTypeChange(type)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      txType === type
+                        ? "bg-purple-500 text-white shadow-sm"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                    }`}
                   >
-                    {page}
-                  </li>
+                    {type}
+                  </button>
                 ))}
-                <FaChevronRight
-                  size={16}
-                  color="#1b1b1b"
-                  cursor={"pointer"}
-                  onClick={() =>
-                    setPagination((prev) =>
-                      totalPage !== null &&
-                      totalPage !== undefined &&
-                      prev >= totalPage
-                        ? totalPage
-                        : prev + 1
-                    )
-                  }
-                />
-              </ul>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                <form
+                  onSubmit={handleSearchForTx}
+                  className="flex items-center"
+                >
+                  <div className="relative flex items-center bg-gray-100 rounded-lg overflow-hidden">
+                    <div className="pl-3">
+                      <IoMdSearch size={20} className="text-gray-500" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search by Transaction ID..."
+                      value={txId}
+                      onChange={(e) => setTxId(e.target.value)}
+                      className="bg-transparent px-3 py-2 pr-4 outline-none text-gray-900 placeholder-gray-500 w-64"
+                      disabled={isSearching}
+                    />
+                    {isSearching && (
+                      <div className="pr-3">
+                        <Spin size="small" />
+                      </div>
+                    )}
+                  </div>
+                </form>
+
+                <button
+                  onClick={() => setShowFilterTxModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <CiFilter size={20} />
+                  Filter
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            {isLoading ? (
+              <LoadingSpinner />
+            ) : transactions.length === 0 ? (
+              <EmptyState txType={txType} />
+            ) : (
+              <>
+                {/* Table */}
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
+                  <table className="w-full min-w-[800px]">
+                    <thead className="bg-purple-500">
+                      <tr>
+                        {[
+                          "Amount",
+                          "Transaction ID",
+                          "Sender",
+                          "Receiver",
+                          "Type",
+                          "Time",
+                        ].map((header) => (
+                          <th
+                            key={header}
+                            className="px-6 py-4 text-left text-sm font-semibold text-white"
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {transactions.map((transaction, index) => (
+                        <tr
+                          key={transaction.transactionId || index}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                            {formatCurrency(transaction.amount)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 font-mono">
+                            {transaction.transactionId}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 capitalize">
+                            {transaction.sender || "N/A"}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 capitalize">
+                            {transaction.receiver || "N/A"}
+                          </td>
+                          <td className="px-6 py-4 text-sm">
+                            <span
+                              className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                                transaction.transactionType === "Transfer"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : transaction.transactionType === "Deposit"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-orange-100 text-orange-800"
+                              }`}
+                            >
+                              {transaction.transactionType}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {formatTime(transaction.createdAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPage > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-6">
+                    <button
+                      onClick={() => handlePaginationChange(pagination - 1)}
+                      disabled={pagination <= 1}
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <FaAngleLeft />
+                    </button>
+
+                    <div className="flex gap-1">
+                      {pageNumbers.map((page, index) => (
+                        <button
+                          key={index}
+                          onClick={() =>
+                            typeof page === "number" &&
+                            handlePaginationChange(page)
+                          }
+                          className={`px-3 py-2 rounded-lg border transition-colors ${
+                            pagination === page
+                              ? "bg-purple-500 text-white border-purple-500"
+                              : "border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => handlePaginationChange(pagination + 1)}
+                      disabled={pagination >= totalPage}
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <FaChevronRight />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

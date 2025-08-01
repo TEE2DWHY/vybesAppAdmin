@@ -12,7 +12,7 @@ interface EventModalProps {
 const EventModal: React.FC<EventModalProps> = ({ hideEventModal, event }) => {
   return (
     <div className="fixed z-50 inset-0 bg-[#1b1b1b62] flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-[95%] sm:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%] max-h-screen overflow-y-auto rounded-2xl shadow-lg p-6 relative transition-all ease-in-out duration-300">
+      <div className="bg-white w-full max-w-[95%] sm:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%] max-h-[70%] sm:max-h-screen  overflow-y-auto rounded-2xl shadow-lg p-6 relative transition-all ease-in-out duration-300">
         {/* Close Button */}
         <div className="absolute top-4 right-4">
           <MdOutlineCancel
