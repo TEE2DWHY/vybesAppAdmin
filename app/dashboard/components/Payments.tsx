@@ -490,9 +490,9 @@ const Payments: React.FC<PaymentEventProps> = ({
                           className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {formatCurrency(transaction.amount)}
+                            {formatCurrency(parseInt(transaction.amount))}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600 font-mono">
+                          <td className="px-6 py-4 text-sm text-gray-600">
                             {transaction.transactionId}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600 capitalize">

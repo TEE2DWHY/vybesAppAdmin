@@ -9,6 +9,13 @@ import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { AxiosError } from "axios";
 import { SparklesCore } from "./dashboard/components/ui/sparkles";
+import {
+  IoEyeOutline,
+  IoEyeOffOutline,
+  IoShieldCheckmarkOutline,
+  IoPersonOutline,
+} from "react-icons/io5";
+import { FiMail, FiLock, FiCheck } from "react-icons/fi";
 
 interface FormData {
   email: string;
@@ -17,6 +24,11 @@ interface FormData {
 
 interface LoginError {
   message: string;
+}
+
+interface ValidationErrors {
+  email?: string;
+  password?: string;
 }
 
 const INITIAL_FORM_DATA: FormData = {
@@ -30,26 +42,84 @@ const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Check for existing token on mount
   useEffect(() => {
     const token = cookie.getCookie("token");
     if (token) {
+      setIsRedirecting(true);
       router.replace("/dashboard");
     }
   }, [router]);
 
+  // Form validation
+  const validateField = useCallback(
+    (name: keyof FormData, value: string): string | null => {
+      switch (name) {
+        case "email":
+          if (!value.trim()) return "Email is required";
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+            return "Please enter a valid email address";
+          return null;
+        case "password":
+          if (!value) return "Password is required";
+          if (value.length < 5) return "Password must be at least 5 characters";
+          return null;
+        default:
+          return null;
+      }
+    },
+    []
+  );
+
   // Memoized validation
   const isFormValid = useMemo(() => {
-    return formData.email.trim() !== "" && formData.password.trim() !== "";
+    return (
+      formData.email.trim() !== "" &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      formData.password.trim() !== "" &&
+      formData.password.length >= 5
+    );
   }, [formData.email, formData.password]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      const fieldName = name as keyof FormData;
+
+      setFormData((prev) => ({ ...prev, [fieldName]: value }));
+
+      // Clear error when user types
+      if (validationErrors[fieldName]) {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[fieldName];
+          return newErrors;
+        });
+      }
     },
-    []
+    [validationErrors]
+  );
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      const fieldName = name as keyof FormData;
+
+      const error = validateField(fieldName, value);
+      if (error) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [fieldName]: error,
+        }));
+      }
+    },
+    [validateField]
   );
 
   const handleRememberMeChange = useCallback(
@@ -59,16 +129,16 @@ const LoginPage: React.FC = () => {
     []
   );
 
-  const showError = useCallback(
-    (errorMessage: string) => {
-      messageApi.error(<div className="font-[outfit]">{errorMessage}</div>);
-    },
-    [messageApi]
-  );
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
 
-  const showSuccess = useCallback(
-    (successMessage: string) => {
-      messageApi.success(<div className="font-[outfit]">{successMessage}</div>);
+  const showMessage = useCallback(
+    (type: "success" | "error" | "info", content: string) => {
+      messageApi[type]({
+        content: <div className="font-[outfit]">{content}</div>,
+        duration: 3,
+      });
     },
     [messageApi]
   );
@@ -77,13 +147,19 @@ const LoginPage: React.FC = () => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      if (!isFormValid) {
-        showError("Please fill in all required fields");
+      // Validate all fields
+      const emailError = validateField("email", formData.email);
+      const passwordError = validateField("password", formData.password);
+
+      if (emailError || passwordError) {
+        setValidationErrors({
+          email: emailError || undefined,
+          password: passwordError || undefined,
+        });
         return;
       }
 
       setIsLoading(true);
-      messageApi.loading(<div className="font-[outfit]">Logging in...</div>);
 
       try {
         const response = await authInstance.post("/login", formData);
@@ -95,13 +171,19 @@ const LoginPage: React.FC = () => {
           throw new Error("No access token received");
         }
 
-        showSuccess(responseMessage || "Login successful!");
+        showMessage(
+          "success",
+          responseMessage || "Welcome back! Redirecting..."
+        );
 
         // Store token with expiration based on remember me
         const expirationDays = rememberMe ? 30 : 1;
-        cookie.storeCookie("token", accessToken, "");
+        cookie.storeCookie("token", accessToken, expirationDays);
 
-        router.push("/dashboard");
+        // Small delay for better UX
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1000);
       } catch (error: unknown) {
         console.error("Login error:", error);
 
@@ -117,182 +199,244 @@ const LoginPage: React.FC = () => {
           errorMessage = error.message;
         }
 
-        showError(errorMessage);
+        showMessage("error", errorMessage);
       } finally {
         setIsLoading(false);
       }
     },
-    [
-      formData,
-      isFormValid,
-      rememberMe,
-      messageApi,
-      showError,
-      showSuccess,
-      router,
-    ]
+    [formData, rememberMe, validateField, showMessage, router]
   );
 
   const handleForgotPassword = useCallback(() => {
-    // Implement forgot password logic here
-    messageApi.info(
-      <div className="font-[outfit]">Forgot password feature coming soon!</div>
+    showMessage(
+      "info",
+      "Please contact support for password reset assistance."
     );
-  }, [messageApi]);
+  }, [showMessage]);
+
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-300 to-blue-200 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-purple-800 font-medium">
+            Redirecting to dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       {contextHolder}
-      <div className="min-h-screen bg-gradient-to-r from-purple-300 to-white relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-300 to-blue-200 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600 rounded-full blur-3xl"></div>
+        </div>
+
         {/* Logo */}
-        <div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-10">
-          <Image
-            src="/images/logo.png"
-            alt="Vybes App Logo"
-            width={40}
-            height={40}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
-            priority
-          />
+        <div className="absolute top-6 left-6 z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+              <IoShieldCheckmarkOutline className="text-white" size={24} />
+            </div>
+            <div className="text-white font-bold text-lg">Vybes Admin</div>
+          </div>
         </div>
 
-        {/* Decorative lock animation */}
-        <div className="absolute bottom-4 right-2 sm:bottom-10 sm:right-5">
-          <Image
-            src="/images/lock.gif"
-            alt="Security animation"
-            width={60}
-            height={60}
-            priority
-            unoptimized
-          />
+        {/* Security Badge */}
+        <div className="absolute top-6 right-6 z-10">
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-white text-xs font-medium">Secure Login</span>
+          </div>
         </div>
 
-        <main className="flex flex-col items-center justify-center min-h-screen px-4 mt-[5%] sm:px-6 lg:px-8">
-          <h1 className="font-semibold mb-6 sm:mb-8 text-xl sm:text-2xl md:text-3xl uppercase text-center leading-tight">
-            Admin Dashboard
-          </h1>
-
-          <form
-            className="bg-white rounded-xl py-6 px-4 sm:py-8 sm:px-6 gap-2 flex flex-col w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl shadow-lg"
-            onSubmit={handleLogin}
-            noValidate
-          >
-            <h2 className="text-black text-center text-lg sm:text-xl md:text-2xl font-medium">
-              Welcome Back, Admin
-            </h2>
-            <p className="capitalize text-sm sm:text-base text-gray-400 text-center max-w-xs mx-auto leading-relaxed">
-              Enter your details to sign in to your account
-            </p>
-
-            <div className="w-full flex flex-col p-3 sm:p-5 space-y-4">
-              {/* Email field */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-sm sm:text-base font-medium text-gray-700"
-                >
-                  Email *
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  className="border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm w-full bg-[#F8F9FA] outline-none text-black focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="Enter your email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  autoComplete="email"
-                  aria-describedby="email-error"
-                />
+        <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-md">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <IoPersonOutline className="text-white" size={32} />
               </div>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Welcome Back
+              </h1>
+              <p className="text-white/80">Sign in to your admin dashboard</p>
+            </div>
 
-              {/* Password field */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="text-sm sm:text-base font-medium text-gray-700"
-                >
-                  Password *
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  name="password"
-                  className="border border-gray-300 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm w-full bg-[#F8F9FA] outline-none text-black focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="Enter your password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                  aria-describedby="password-error"
-                  minLength={6}
-                />
-              </div>
+            {/* Login Form */}
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
+              <form onSubmit={handleLogin} className="space-y-6" noValidate>
+                {/* Email field */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-white"
+                  >
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FiMail className="h-5 w-5 text-white/60" />
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      className={`block w-full pl-10 pr-3 py-3 bg-white/10 border rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all ${
+                        validationErrors.email
+                          ? "border-red-400"
+                          : "border-white/30"
+                      }`}
+                      placeholder="Enter your email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      disabled={isLoading}
+                      autoComplete="email"
+                    />
+                  </div>
+                  {validationErrors.email && (
+                    <p className="text-red-300 text-sm mt-1">
+                      {validationErrors.email}
+                    </p>
+                  )}
+                </div>
 
-              {/* Remember me and forgot password */}
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mt-4 sm:mt-6">
-                <label className="text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="accent-purple-500 w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                    checked={rememberMe}
-                    onChange={handleRememberMeChange}
+                {/* Password field */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-white"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FiLock className="h-5 w-5 text-white/60" />
+                    </div>
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      className={`block w-full pl-10 pr-12 py-3 bg-white/10 border rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all ${
+                        validationErrors.password
+                          ? "border-red-400"
+                          : "border-white/30"
+                      }`}
+                      placeholder="Enter your password"
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      disabled={isLoading}
+                      autoComplete="current-password"
+                      minLength={5}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={togglePasswordVisibility}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <IoEyeOffOutline className="h-5 w-5 text-white/60 hover:text-white/80" />
+                      ) : (
+                        <IoEyeOutline className="h-5 w-5 text-white/60 hover:text-white/80" />
+                      )}
+                    </button>
+                  </div>
+                  {validationErrors.password && (
+                    <p className="text-red-300 text-sm mt-1">
+                      {validationErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Remember me and forgot password */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-purple-600 bg-white/10 border-white/30 rounded focus:ring-purple-500 focus:ring-2"
+                      checked={rememberMe}
+                      onChange={handleRememberMeChange}
+                      disabled={isLoading}
+                    />
+                    <span className="ml-2 text-sm text-white">Remember me</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="text-sm text-white/80 hover:text-white transition-colors"
+                    onClick={handleForgotPassword}
                     disabled={isLoading}
-                  />
-                  <span>Remember Me</span>
-                </label>
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                {/* Submit button */}
                 <button
-                  type="button"
-                  className="text-xs sm:text-sm text-purple-500 hover:text-purple-600 transition-colors text-left sm:text-right disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleForgotPassword}
-                  disabled={isLoading}
+                  type="submit"
+                  className="w-full bg-white text-purple-600 py-3 px-4 rounded-xl font-semibold hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={isLoading || !isFormValid}
                 >
-                  Forgot Password?
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <FiCheck size={18} />
+                      Sign In
+                    </>
+                  )}
                 </button>
+              </form>
+
+              {/* Register link */}
+              <div className="mt-6 text-center">
+                <p className="text-white/80 text-sm">
+                  Need an admin account?{" "}
+                  <Link
+                    href="mailto:hello@admin.vybesapp.com"
+                    className="font-semibold text-white hover:text-white/80 transition-colors underline underline-offset-2"
+                  >
+                    Contact Support
+                  </Link>
+                </p>
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-2/3 md:w-1/2 text-sm sm:text-base rounded-3xl py-2.5 sm:py-3 text-white self-center transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-              disabled={isLoading || !isFormValid}
-              aria-describedby="login-button-description"
-            >
-              {isLoading ? "Signing In..." : "Login"}
-            </button>
+            {/* Features */}
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                <IoShieldCheckmarkOutline className="w-8 h-8 text-white mx-auto mb-2" />
+                <p className="text-white/80 text-sm">Secure Access</p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+                <IoPersonOutline className="w-8 h-8 text-white mx-auto mb-2" />
+                <p className="text-white/80 text-sm">Admin Panel</p>
+              </div>
+            </div>
 
-            {/* Screen reader description for login button */}
-            <span id="login-button-description" className="sr-only">
-              {isLoading
-                ? "Please wait while we sign you in"
-                : "Click to sign in to your admin account"}
-            </span>
-
-            <p className="text-xs sm:text-sm text-center my-4 capitalize px-2">
-              Don't have an admin account?{" "}
-              <Link
-                href="/register"
-                className="font-bold underline text-purple-500 hover:text-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded"
-              >
-                Sign Up Here
-              </Link>
-            </p>
-          </form>
-
-          {/* Sparkles animation */}
-          <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl h-20 sm:h-32 md:h-40 relative flex items-center justify-center mt-4 sm:mt-8">
-            <SparklesCore
-              background="transparent"
-              minSize={0.4}
-              maxSize={1}
-              particleDensity={800}
-              className="w-full h-full self-center"
-              particleColor="#a855f7"
-            />
+            {/* Sparkles animation */}
+            <div className="w-full h-20 relative flex items-center justify-center mt-8">
+              <SparklesCore
+                background="transparent"
+                minSize={0.4}
+                maxSize={1}
+                particleDensity={400}
+                className="w-full h-full"
+                particleColor="#ffffff"
+              />
+            </div>
           </div>
         </main>
       </div>
