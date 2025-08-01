@@ -255,7 +255,7 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 mt-8">
+        <main className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 mt-14">
           <div className="w-full max-w-md">
             {/* Header */}
             <div className="text-center mb-8">
